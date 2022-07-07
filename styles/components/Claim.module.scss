@@ -1,0 +1,35 @@
+.claim__container {
+  padding: 120px 0;
+}
+
+.title {
+  text-shadow: 1px 1px ghostwhite;
+}
+
+.modal {
+  display: flex;
+  flex-flow: column;
+  width: 100%;
+  height: 200px;
+  background-color: #3d3d3d;
+  border-radius: 5px;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal_error_title {
+  padding-bottom: 10px;
+  font-weight: bolder;
+}
+
+.modal_error_second_description {
+  padding-top: 10px;
+}
+
+.container {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}

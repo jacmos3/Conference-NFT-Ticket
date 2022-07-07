@@ -1,0 +1,12 @@
+.link {
+  margin: 0 10px;
+  font-weight: 600;
+  &:hover {
+    color: white;
+  }
+}
+
+.section__footer {
+  background: linear-gradient(to right, #002348, #467396);
+  color: #f8f8f8;
+}

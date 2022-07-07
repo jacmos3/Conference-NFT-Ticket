@@ -1,0 +1,8 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#142E51",
+        "titleBar.activeBackground": "#1C4071",
+        "titleBar.activeForeground": "#F8FAFD"
+    },
+    "solidity.compileUsingRemoteVersion": "v0.8.9+commit.e5eed63a"
+}
