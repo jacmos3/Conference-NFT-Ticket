@@ -8,32 +8,32 @@ function Head() {
   return (
     <HTMLHead>
       {/* Primary Meta Tags */}
-      <title>Little Traveler</title>
-      <meta name="title" content="Little Traveler" />
+      <title>Web3 in Travel NFT Tickets</title>
+      <meta name="title" content="Web3 in Travel NFT Tickets" />
       <meta
         name="description"
-        content="A 10,000 native multichain PFP NFT project for the travelers and the travel industry."
+        content="NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022 The first travel summit dedicated to the transition to Web3.Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
 
       {/* OG + Facebook */}
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://www.littletraveler.org" />
-      <meta property="og:title" content="Little Traveler" />
+      <meta property="og:url" content="https://www.nft.web3intravel.com/" />
+      <meta property="og:title" content="Web3 in Travel NFT Tickets" />
       <meta
         property="og:description"
-        content="A 10,000 native multi-chain PFP NFT project for the travelers and the travel industry."
+        content="NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022 The first travel summit dedicated to the transition to Web3.Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
-      <meta property="og:image" content="https://www.littletraveler.org/meta.png" />
+      <meta property="og:image" content="www.nft.web3intravel.com/meta.png" />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content="https://www.littletraveler.org" />
-      <meta property="twitter:title" content="Little Traveler" />
+      <meta property="twitter:url" content="https://www.nft.web3intravel.com/" />
+      <meta property="twitter:title" content="Web3 in Travel NFT Tickets" />
       <meta
         property="twitter:description"
-        content="A 10,000 native multi-chain PFP NFT project for the travelers and the travel industry."
+        content="NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022 The first travel summit dedicated to the transition to Web3.Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
-      <meta property="twitter:image" content="https://www.littletraveler.org/meta.png" />
+      <meta property="twitter:image" content="https://www.nft.web3intravel.com/meta.png" />
 
       {/* Font */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />

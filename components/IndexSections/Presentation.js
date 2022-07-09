@@ -23,13 +23,13 @@ class Presentation extends Component {
 
                         <div className={`${styles.button__component}`}>
                             <a href="#Claim">
-                                <button className={`btn btn__primary`}>
+                                <button id="btnClaim" className={`btn btn__primary`}  onClick={this.props.connect}>
                                     Mint ticket
                                 </button>
                             </a>
 
-                            <a href="#Sponsor">
-                                <button className={`btn btn__alternative`}>
+                            <a href="#Sponsorship">
+                                <button id = "btnSponsorship" className={`btn btn__alternative`}  onClick={this.props.connect}>
                                     Become Sponsor
                                 </button>
                             </a>

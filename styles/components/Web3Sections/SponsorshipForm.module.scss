@@ -1,0 +1,24 @@
+.form{
+  margin: auto !important;
+  width: 50% !important;
+  padding: 10px !important;
+}
+
+.buttons__component {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+}
+.content{
+  h3{
+    margin-top:20px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .form{
+    padding: 0px !important;
+    width: auto !important;
+    margin: 0px !important;
+  }
+}

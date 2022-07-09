@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Container, Button, Tab} from 'semantic-ui-react';
-import styles from "../../styles/components/Claim.module.scss"; // Styles
-import ClaimingForm from "./Web3Sections/ClaimingForm"
+import styles from "../../styles/components/Sponsorship.module.scss"; // Styles
+import SponsorshipForm from "./Web3Sections/SponsorshipForm"
 
 
 class Claim extends Component {
@@ -27,6 +27,18 @@ class Claim extends Component {
             .filter(chain => chain.id === this.props.state.web3Settings.networkId)
             .map(chain => chain.options)[0];
 
+        const panes = [
+          {
+              menuItem: "Yours",
+              render: () => <FetchNFTList state={this.props.state}/>
+          },
+            option && option.coin ?
+                {
+                    menuItem: 'Mint With ' + option.coin.name,
+                    render: () => <ClaimWithEther state={this.props.state} goToFetch={this.goToFetch}/>,
+                } : null,
+
+        ]
         return (
             <div className={`${styles.claim__container} py-10 text-trips-1`}>
                 <div className="flex justify-around">
@@ -40,7 +52,7 @@ class Claim extends Component {
                                 ?
                                 (
                                     <div>
-                                        <ClaimingForm state={this.props.state} goToFetch={this.goToFetch}/>
+                                        <SponsorshipForm state={this.props.state} goToFetch={this.goToFetch}/>
                                     </div>
                                 )
                                 : (
@@ -82,7 +94,7 @@ class Claim extends Component {
 
                                                         : (
                                                             <div className="text-center">
-                                                                <button className={`btn btn__primary`} onClick={this.props.connect}>
+                                                                <button className={`btn btn__alternative`} onClick={this.props.connect}>
                                                                     Connect Wallet
                                                                 </button>
                                                             </div>

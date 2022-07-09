@@ -1,17 +1,18 @@
 import React, {Component} from 'react';
 import {Form,Field,Input,Message,Button,Container,Checkbox,Card} from 'semantic-ui-react';
 import Conference from '../../../ethereum/build/Conference.sol.json';
-import styles from "../../../styles/components/claimSections/ClaimingForm.module.scss";
+import styles from "../../../styles/components/Web3Sections/SponsorshipForm.module.scss";
 
-class ClaimWithEther extends Component{
+class SponsorshipForm extends Component{
   state = {
     loading:0,
     errorMessage:"",
     coin:"",
-    price:0,
+    sponsorPrice:0,
     address:"0xc710e8e155d08F5c9b07722C02221E3f904BE518",
     checked:true,
-    buttonLabel: "Mint",
+    buttonLabel: "Sponsorize!",
+    sponsorQuote:"",
     all:[]
   }
   constructor(props){
@@ -40,31 +41,30 @@ class ClaimWithEther extends Component{
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
-            this.setState({buttonLabel:"Minting paused",loading: this.state.loading + 1});
+            this.setState({buttonLabel:"Paused",loading: this.state.loading + 1});
             return false;
           }
 
           let totalSupply = parseInt(await instance.methods.totalSupply().call());
           let maxSupply = parseInt(await instance.methods.MAX_ID().call());
-          let price = parseInt(await instance.methods.price().call());
+          let sponsorPrice = parseInt(await instance.methods.sponsorshipPrice().call());
 
-          if (totalSupply > maxSupply){
+          if (totalSupply >= maxSupply){
             console.log("minting finished");
-            this.setState({buttonLabel:"Minting finished",loading: this.state.loading + 1});
+            this.setState({buttonLabel:"Time ended",loading: this.state.loading + 1});
             return false;
           }
 
-          console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + price + " " + paused);
+          console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + sponsorPrice + " " + paused);
           //let checkAllowance = parseInt(this.props.state.web3.utils.fromWei(allowanceAmount, 'ether')) >= this.state.howMuchTrips;
-          this.setState({totalSupply,maxSupply,price});
+          this.setState({totalSupply,maxSupply,sponsorPrice});
           //console.log("allowanceAmount: " + checkAllowance + ", trips: " + this.state.howMuchTrips);
 
           this.setState({loading: this.state.loading - 1, errorMessage: ""});
-          return price;
+          return sponsorPrice;
       } catch (err) {
         console.log(err);
           this.setState({loading: this.state.loading - 1, errorMessage: err.message});
-          this.fetchInitialInfo();
           return false;
       }
 
@@ -73,9 +73,9 @@ class ClaimWithEther extends Component{
   }
 
 
-  onMint = async (event) => {
+  onSponsorizing = async (event) => {
     event.preventDefault();
-    console.log("mint");
+    console.log("sponsorizing");
 
     this.setState({loading:this.state.loading+1, errorMessage:''})
     try{
@@ -83,12 +83,13 @@ class ClaimWithEther extends Component{
       const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
       //console.log(this.props.state.web3.utils.fromWei(this.state.checked ? this.state.price.toString() : Math.trunc(this.state.price *1.2).toString()));
       //await instance.methods.claimByPatrons(this.state.checked).send({from:accounts[0], value:(this.props.state.web3.utils.fromWei(this.state.checked ? this.state.price.toString() : Math.trunc(this.state.price *1.2).toString()))});
-      console.log(!this.state.checked ? Math.trunc(this.state.price *1.2).toString() : this.state.price.toString() );
-      await instance.methods.claimByPatrons(!this.state.checked).send({from:accounts[0], value:(!this.state.checked ? Math.trunc(this.state.price *1.2).toString() : this.state.price.toString())});
+      console.log("quote:" + this.state.sponsorQuote.toString() );
+      await instance.methods.sponsorship(this.state.sponsorQuote.toString()).send({from:accounts[0], value:this.state.sponsorPrice.toString()});
       this.fetchNFTList();
       this.fetchInitialInfo();
     }
     catch(err){
+      console.log(err);
       this.setState({errorMessage: err.message});
       this.fetchInitialInfo();
     }
@@ -100,24 +101,10 @@ class ClaimWithEther extends Component{
       try{
         const accounts= await this.props.state.web3.eth.getAccounts();
         const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
-        let lastUserIndex = await instance.methods.balanceOf(accounts[0]).call()
-        .then((result) =>{
-            return JSON.parse(result);
-        })
-        .catch((error) =>{
-          console.log(error);
-        })
+        let totalSupply = parseInt(await instance.methods.totalSupply().call());
         let all = [];
-        for (let index = 0; index < lastUserIndex; index++){
-          let tokenId = await instance.methods.tokenOfOwnerByIndex(accounts[0],index).call()
-          .then((result) =>{
-            return result;
-          })
-          .catch((error)=>{
-            console.log(error);
-          });
-
-          let uri = await instance.methods.tokenURI(tokenId).call()
+        for (let index = 1; index <= totalSupply; index++){
+          let uri = await instance.methods.tokenURI(index).call()
           .then((result)=> {
             return JSON.parse(window.atob(result.split(',')[1]));
 
@@ -126,13 +113,13 @@ class ClaimWithEther extends Component{
             console.log(error);
           });
 
+          console.log("test"+uri);
           let element = {"header": uri.name,/*"description":uri.description,*/"image":uri.image};
           all.push(element);
           console.log(uri);
           this.setState({all:all});
         }
-        this.setState({minted:true});
-        //console.log(this.state.all.description);
+
 
       }catch(err){
         this.setState({errorMessage: err.message});
@@ -151,28 +138,24 @@ class ClaimWithEther extends Component{
     this.setState({howManyLT: event.target.value});
   }
 
+  handleChange = (e, { value }) => {
+    console.log(value);
+    this.setState({ sponsorQuote:value })
+  }
+
 render(){
   return (
     <Container>
-    <h2 className="text-center">NFT ticket #{this.state.totalSupply} out of {this.state.maxSupply}</h2>
+    <h2 className="text-center ">Sponsorship Price: ${this.state.sponsorPrice} xDAI</h2>
     <br />
         <Form error={!!this.state.errorMessage} className= {`${styles.form}`}>
               <Form.Field>
-              <h3>Next ticket cost:</h3>
+              <h3>Insert your quote</h3>
               <Input
-                label={{ basic: true, content: this.state.coin.name, id:"inputLabel" }}
-                labelPosition='right'
-                placeholder='Ether amount'
-                readOnly
-                value = {this.state.checked ? this.state.price : Math.trunc(this.state.price *1.2)}
+                  error = {true}
+                  placeholder='Clear Cleaning Corporation'
+                  onChange={this.handleChange}
               />
-              </Form.Field>
-              <Form.Field className={`${styles.content}`} >
-              <h3>Airdrop:</h3>
-                <Checkbox
-                toggle
-                onClick={this.handleClick}
-                  />
               </Form.Field>
               <Form.Field>
                 <Message error header="Oops!" content = {this.state.errorMessage} />
@@ -180,10 +163,11 @@ render(){
 
               <div className={`${styles.buttons__component}`}>
 
-                <button onClick = {this.onMint} className={`btn btn__primary`} disabled={this.state.loading > 0}>
+                <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0}>
                   {this.state.buttonLabel}
                 </button>
-                <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0} >Refresh</button>
+                <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0} >View</button>
+
 
               </div>
             </Form>
@@ -194,4 +178,4 @@ render(){
   )
 };
 };
-export default ClaimWithEther;
+export default SponsorshipForm;

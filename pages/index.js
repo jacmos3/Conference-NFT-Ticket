@@ -2,9 +2,7 @@ import React, {Component} from 'react';
 import Layout from '../components/Layout.js';
 import Presentation from '../components/IndexSections/Presentation.js';
 import Claim from '../components/IndexSections/Claim.js';
-
-import Space from '../components/IndexSections/Space.js';
-
+import Sponsorship from '../components/IndexSections/Sponsorship.js';
 import {Header, Button} from 'semantic-ui-react';
 //import web3 from '../ethereum/web3';
 import {Router} from '../routes';
@@ -66,6 +64,12 @@ class MyDapp extends Component {
     }
 
     connect = async (event) => {
+      let myId = event.target.id.split("btn")[1];
+      //this.setState({selectedSection:myId});
+      //console.log(myId);
+      if (this.state.web3Settings.isWeb3Connected)
+        return false;
+
         var providerOptions = {
             injected: {
                 display: {
@@ -145,6 +149,8 @@ class MyDapp extends Component {
 
 
         console.log("web3connected:",this.state.web3Settings.isWeb3Connected);
+
+        document.getElementById(myId).scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
 
     truncateAddress(address) {
@@ -175,10 +181,32 @@ class MyDapp extends Component {
                             )
                     }
                 </div>
+                <div>
 
-                <Presentation disconnect={this.disconnect} connect={this.connect} state={this.state}/>
-                <div id="Claim" className="bg-trips-5">
-                  <Claim disconnect={this.disconnect} connect={this.connect} state={this.state}/>
+
+
+                  <Presentation disconnect={this.disconnect} connect={this.connect} state={this.state} />
+                {
+                    this.state.web3Settings.isWeb3Connected
+                    ?(
+                      <div>
+                        {
+                          this.state.selectedSection=="Claim"
+                          ?
+                            <div id="Claim" className="bg-trips-5">
+                              <Claim disconnect={this.disconnect} connect={this.connect} state={this.state}/>
+                            </div>
+                          :
+                            <div id="Sponsorship" className="bg-trips-5">
+                              <Sponsorship disconnect={this.disconnect} connect={this.connect} state={this.state}/>
+                            </div>
+                        }
+
+
+                      </div>
+                    )
+                    :<div></div>
+                }
               </div>
             </Layout>
         )
