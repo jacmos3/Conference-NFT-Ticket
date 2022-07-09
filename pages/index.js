@@ -16,7 +16,7 @@ import styles from "../styles/pages/INDEX.module.scss";
 
 class MyDapp extends Component {
     state = {
-        opensea: "https://opensea.io/collection/...",
+        opensea: "https://testnets.opensea.io/collection/web3-in-travel-nft-ticket-tbv0qt7nou",
         etherscan: "https://etherscan.io/",
         twitter: "https://twitter.com/tripscommunity",
         website: "https://web3intravel.com/",
@@ -65,8 +65,8 @@ class MyDapp extends Component {
 
     connect = async (event) => {
       let myId = event.target.id.split("btn")[1];
-      //this.setState({selectedSection:myId});
-      //console.log(myId);
+      this.setState({selectedSection:myId});
+      console.log(myId);
       if (this.state.web3Settings.isWeb3Connected)
         return false;
 
@@ -150,7 +150,7 @@ class MyDapp extends Component {
 
         console.log("web3connected:",this.state.web3Settings.isWeb3Connected);
 
-        document.getElementById(myId).scrollIntoView({ behavior: 'smooth', block: 'start' })
+        document.getElementById(this.state.selectedSection).scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
 
     truncateAddress(address) {
@@ -174,39 +174,39 @@ class MyDapp extends Component {
                             )
                             : (
                                 <a href="#Claim" className={`px-5`}>
-                                    <button className={`btn btn__wallet`} onClick={this.connect}>
+                                    <button id = "btnHome" className={`btn btn__wallet`} onClick={this.connect}>
                                         Connect wallet
                                     </button>
                                 </a>
                             )
                     }
                 </div>
-                <div>
-
-
-
+                <div id="Home">
                   <Presentation disconnect={this.disconnect} connect={this.connect} state={this.state} />
-                {
+                  {
                     this.state.web3Settings.isWeb3Connected
                     ?(
                       <div>
                         {
-                          this.state.selectedSection=="Claim"
+                          this.state.selectedSection=="Sponsorship"
                           ?
-                            <div id="Claim" className="bg-trips-5">
-                              <Claim disconnect={this.disconnect} connect={this.connect} state={this.state}/>
-                            </div>
-                          :
                             <div id="Sponsorship" className="bg-trips-5">
                               <Sponsorship disconnect={this.disconnect} connect={this.connect} state={this.state}/>
+                            </div>
+                          :
+                            <div id="Claim" className="bg-trips-5">
+                              <Claim disconnect={this.disconnect} connect={this.connect} state={this.state}/>
                             </div>
                         }
 
 
                       </div>
                     )
-                    :<div></div>
-                }
+                    :(
+                      <div>
+                      </div>
+                    )
+                  }
               </div>
             </Layout>
         )

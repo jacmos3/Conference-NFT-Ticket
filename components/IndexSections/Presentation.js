@@ -38,11 +38,14 @@ class Presentation extends Component {
                     </div>
 
                         <div className={`${styles.social__component}`}>
-                            <a
+                            { /*
+                              <a
                                 href={this.props.state.opensea}
                                 target="_blank">
                                 <img className={`btn btn__secondary`} src="../img/social/opensea.svg" alt="Opensea"/>
                             </a>
+                            */
+                          }
                             <a
                                 href={this.props.state.twitter}
                                 target="_blank">

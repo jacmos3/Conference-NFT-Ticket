@@ -20,7 +20,7 @@ class Footer extends Component {
                     <br/>
                     <br/>
                     Website and Smart Contract's code are
-                        <a target="_blank" rel="noopener noreferrer" href="https://github.com/jacmos3/LittleTraveler" className={`${styles__footer.link} a__link__secondary`}>
+                        <a target="_blank" rel="noopener noreferrer" href="https://github.com/jacmos3/Conference-NFT-Ticket" className={`${styles__footer.link} a__link__secondary`}>
                             <span>open-source</span>
                         </a>
                     and licensed under MIT license.
