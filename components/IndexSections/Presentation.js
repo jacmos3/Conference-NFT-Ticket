@@ -24,7 +24,7 @@ class Presentation extends Component {
                         <div className={`${styles.button__component}`}>
                             <a href="#Claim">
                                 <button id="btnClaim" className={`btn btn__primary`}  onClick={this.props.connect}>
-                                    Mint ticket
+                                    Buy NFT ticket
                                 </button>
                             </a>
 

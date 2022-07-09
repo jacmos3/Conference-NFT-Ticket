@@ -153,7 +153,7 @@ render(){
               <h3>Insert your quote</h3>
               <Input
                   error = {true}
-                  placeholder='Clear Cleaning Corporation'
+                  placeholder='Trips Community DAO'
                   onChange={this.handleChange}
               />
               </Form.Field>
