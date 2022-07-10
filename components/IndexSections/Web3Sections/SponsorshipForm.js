@@ -55,10 +55,8 @@ class SponsorshipForm extends Component{
             return false;
           }
 
-          console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + sponsorPrice + " " + paused);
-          //let checkAllowance = parseInt(this.props.state.web3.utils.fromWei(allowanceAmount, 'ether')) >= this.state.howMuchTrips;
+          //console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + sponsorPrice + " " + paused);
           this.setState({totalSupply,maxSupply,sponsorPrice});
-          //console.log("allowanceAmount: " + checkAllowance + ", trips: " + this.state.howMuchTrips);
 
           this.setState({loading: this.state.loading - 1, errorMessage: ""});
           return sponsorPrice;
@@ -89,7 +87,7 @@ class SponsorshipForm extends Component{
       this.fetchInitialInfo();
     }
     catch(err){
-      console.log(err);
+      //console.log(err);
       this.setState({errorMessage: err.message});
       this.fetchInitialInfo();
     }
@@ -114,9 +112,8 @@ class SponsorshipForm extends Component{
           });
 
           console.log("test"+uri);
-          let element = {"header": uri.name,/*"description":uri.description,*/"image":uri.image};
+          let element = {"header": uri.name,"image":uri.image};
           all.push(element);
-          console.log(uri);
           this.setState({all:all});
         }
 
@@ -128,18 +125,17 @@ class SponsorshipForm extends Component{
     }
 
   handleClick = (e, { checked }) => {
-    console.log("cheked: " + checked);
+    //console.log("cheked: " + checked);
     this.setState({checked:!checked});
   }
 
   onChange(event){
     event.preventDefault();
-    console.log(event.target.value * this.state.coin.amount);
+    //console.log(event.target.value * this.state.coin.amount);
     this.setState({howManyLT: event.target.value});
   }
 
   handleChange = (e, { value }) => {
-    console.log(value);
     this.setState({ sponsorQuote:value })
   }
 
@@ -163,10 +159,10 @@ render(){
 
               <div className={`${styles.buttons__component}`}>
 
-                <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0}>
+                <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 35}>
                   {this.state.buttonLabel}
                 </button>
-                <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0} >View</button>
+                <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0} >View all</button>
 
 
               </div>
