@@ -1367,7 +1367,8 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function sponsorship(string memory _quote) external payable nonReentrant {
         require(!paused, ERR_MINTING_PAUSED);
-        require(bytes(_quote).length <= 35, ERR_TOO_MANY_CHARS);
+        uint256 len = bytes(_quote).length;
+        require(len > 0 && len <= 35, ERR_TOO_MANY_CHARS);
         require(msg.value == sponsorshipPrice, ERR_INSERT_EXACT);
         details[DET_SPONSOR_QUOTE] = _quote;
         details[DET_SPONSOR_QUOTE_LONG] = string(abi.encodePacked(SPONSOR, _quote));
@@ -1375,7 +1376,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         oldSponsorPayment = sponsorPayment;
         sponsorAddress = _msgSender();
         sponsorPayment = sponsorshipPrice;
-        sponsorshipPrice = (sponsorshipPrice * 15) / 10;
+        sponsorshipPrice = (sponsorshipPrice * 12) / 10;
         if (oldSponsorPayment > 0){
             (bool sent,) = payable(oldSponsorAddress).call{value:oldSponsorPayment}("");
             require(sent, ERR_SENT_FAIL);
