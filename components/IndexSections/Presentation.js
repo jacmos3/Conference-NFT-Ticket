@@ -9,22 +9,20 @@ class Presentation extends Component {
 
     render() {
         return (
-            <div className={`${styles.hero__img} ${styles.presentation__section}`}>
+            <div className={`${styles.hero__img}`}>
                 <div className={styles.presentation__content}>
                     <div className={`${styles.text__content}`}>
-                        <h1 className={`${styles.title} text-trips-1 text-center`}>"WEB3 IN TRAVEL"<br />Summit</h1>
+                        <h1 className={`${styles.title} text-trips-1 text-center`}>Mint a conference <br />NFT Ticket!</h1>
                         <div className={`${styles.text__description} text-trips-1 text-center`}>
-                        The first travel summit dedicated to the transition to Web3.
-                        <br />
-                        Speeches, panels and workshops to help the industry upgrade to the new internet.
+
                         <div className={`${styles.img}`} >
-                          <img width="350px" src={'/img/Ticket.svg'}/>
+                          <img width="480px" src={'/img/Ticket.svg'}/>
                         </div>
 
                         <div className={`${styles.button__component}`}>
                             <a href="#Claim">
                                 <button id="btnClaim" className={`btn btn__primary`}  onClick={this.props.connect}>
-                                    Buy NFT ticket
+                                    Mint NFT ticket
                                 </button>
                             </a>
 
@@ -45,7 +43,7 @@ class Presentation extends Component {
                                 <img className={`btn btn__secondary`} src="../img/social/opensea.svg" alt="Opensea"/>
                             </a>
                             */
-                          }
+                            }
                             <a
                                 href={this.props.state.twitter}
                                 target="_blank">

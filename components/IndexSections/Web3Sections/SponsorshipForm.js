@@ -7,6 +7,8 @@ class SponsorshipForm extends Component{
   state = {
     loading:0,
     errorMessage:"",
+    warningMessage:"",
+    successMessage:'',
     coin:"",
     sponsorPrice:0,
     address:"0xc710e8e155d08F5c9b07722C02221E3f904BE518",
@@ -51,7 +53,7 @@ class SponsorshipForm extends Component{
 
           if (totalSupply >= maxSupply){
             console.log("minting finished");
-            this.setState({buttonLabel:"Time ended",loading: this.state.loading + 1});
+            this.setState({buttonLabel:"Time ended",loading:this.state.loading + 1});
             return false;
           }
 
@@ -70,12 +72,11 @@ class SponsorshipForm extends Component{
       return true;
   }
 
-
   onSponsorizing = async (event) => {
     event.preventDefault();
     console.log("sponsorizing");
 
-    this.setState({loading:this.state.loading+1, errorMessage:''})
+    this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage: "wait please...", successMessage:""})
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
       const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
@@ -85,17 +86,18 @@ class SponsorshipForm extends Component{
       await instance.methods.sponsorship(this.state.sponsorQuote.toString()).send({from:accounts[0], value:this.state.sponsorPrice.toString()});
       this.fetchNFTList();
       this.fetchInitialInfo();
+      this.setState({successMessage:"Sponsorizing successfull! check the result below:"});
     }
     catch(err){
       //console.log(err);
-      this.setState({errorMessage: err.message});
+      this.setState({errorMessage: err.message,warningMessage:"",successMessage:''});
       this.fetchInitialInfo();
     }
-    this.setState({loading:this.state.loading-1});
+    this.setState({loading:this.state.loading-1, warningMessage:""});
   }
 
   fetchNFTList = async () => {
-      this.setState({loading:this.state.loading+1, errorMessage:''})
+      this.setState({loading:this.state.loading+1, errorMessage:'',successMessage:''})
       try{
         const accounts= await this.props.state.web3.eth.getAccounts();
         const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
@@ -116,7 +118,6 @@ class SponsorshipForm extends Component{
           all.push(element);
           this.setState({all:all});
         }
-
 
       }catch(err){
         this.setState({errorMessage: err.message});
@@ -144,17 +145,19 @@ render(){
     <Container>
     <h2 className="text-center ">Sponsorship Price: ${this.state.sponsorPrice} xDAI</h2>
     <br />
-        <Form error={!!this.state.errorMessage} className= {`${styles.form}`}>
+        <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
               <Form.Field>
               <h3>Insert your quote</h3>
               <Input
                   error = {true}
-                  placeholder='Trips Community DAO'
+                  placeholder='[Insert your company name here]'
                   onChange={this.handleChange}
               />
               </Form.Field>
               <Form.Field>
                 <Message error header="Oops!" content = {this.state.errorMessage} />
+                <Message warning header="Pending..." content = {this.state.warningMessage} />
+                <Message success header="Success!" content = {this.state.successMessage} />
               </Form.Field>
 
               <div className={`${styles.buttons__component}`}>

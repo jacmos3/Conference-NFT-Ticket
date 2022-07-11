@@ -7,12 +7,15 @@ class ClaimingForm extends Component{
   state = {
     loading:0,
     errorMessage:"",
+    warningMessage:"",
+    successMessage:"",
     coin:"",
     price:0,
     address:"0xc710e8e155d08F5c9b07722C02221E3f904BE518",
     checked:true,
     buttonLabel: "Mint",
-    all:[]
+    all:[],
+    multiplier:1.2
   }
   constructor(props){
     super(props);
@@ -32,7 +35,7 @@ class ClaimingForm extends Component{
   async fetchInitialInfo() {
       console.log("fetching ticket price");
 
-      this.setState({loading: this.state.loading + 1, errorMessage: ''});
+      this.setState({loading: this.state.loading + 1, errorMessage: '',successMessage:''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address);
@@ -74,7 +77,7 @@ class ClaimingForm extends Component{
     event.preventDefault();
     console.log("mint");
 
-    this.setState({loading:this.state.loading+1, errorMessage:''})
+    this.setState({loading:this.state.loading+1, errorMessage:'',warningMessage: "wait please...",successMessage:''})
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
       const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
@@ -84,16 +87,17 @@ class ClaimingForm extends Component{
       await instance.methods.claimByPatrons(!this.state.checked).send({from:accounts[0], value:(!this.state.checked ? Math.trunc(this.state.price *1.2).toString() : this.state.price.toString())});
       this.fetchNFTList();
       this.fetchInitialInfo();
+      this.setState({successMessage:"Minting successfull! check your ticket below:"});
     }
     catch(err){
-      this.setState({errorMessage: err.message});
+      this.setState({errorMessage: err.message,warningMessage: ""});
       this.fetchInitialInfo();
     }
-    this.setState({loading:this.state.loading-1});
+    this.setState({loading:this.state.loading-1,warningMessage: ""});
   }
 
   fetchNFTList = async () => {
-      this.setState({loading:this.state.loading+1, errorMessage:''})
+      this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage:'',successMessage:''})
       try{
         const accounts= await this.props.state.web3.eth.getAccounts();
         const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
@@ -151,35 +155,38 @@ class ClaimingForm extends Component{
       <Container>
       <h2 className="text-center">NFT ticket #{this.state.totalSupply} out of {this.state.maxSupply}</h2>
       <br />
-          <Form error={!!this.state.errorMessage} className= {`${styles.form}`}>
+          <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
                 <Form.Field>
                 <h3>Next ticket cost:</h3>
+                <div >The price increases after every purchase following a bounding curve.</div>
                 <Input
                   label={{ basic: true, content: this.state.coin.name, id:"inputLabel" }}
                   labelPosition='right'
                   placeholder='Ether amount'
                   readOnly
-                  value = {this.state.checked ? this.state.price : Math.trunc(this.state.price *1.2)}
+                  value = {this.state.checked ? this.state.price : Math.trunc(this.state.price * this.state.multiplier)}
                 />
                 </Form.Field>
                 <Form.Field className={`${styles.content}`} >
+
                 <h3>Airdrop:</h3>
+                <div>Select this option for airdrop rights after the conference.</div>
                   <Checkbox
-                  toggle
-                  onClick={this.handleClick}
-                    />
+                    toggle
+                    onClick={this.handleClick}
+                  />
                 </Form.Field>
                 <Form.Field>
                   <Message error header="Oops!" content = {this.state.errorMessage} />
+                  <Message warning header="Pending..." content = {this.state.warningMessage} />
+                  <Message success header="Pending..." content = {this.state.successMessage} />
                 </Form.Field>
 
                 <div className={`${styles.buttons__component}`}>
-
                   <button onClick = {this.onMint} className={`btn btn__primary`} disabled={this.state.loading > 0}>
                     {this.state.buttonLabel}
                   </button>
-                  <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0} >Refresh</button>
-
+                  <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0}>Refresh</button>
                 </div>
               </Form>
               <div style={{padding:"15px"}}>

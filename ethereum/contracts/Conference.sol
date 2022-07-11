@@ -1285,7 +1285,7 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
 //// NFT Ticket Conference by Trips Community - @jacmos3
 contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     bool public paused;
-    uint16 public constant MAX_ID = 75;
+    uint16 public constant MAX_ID = 500;
     uint256 public constant INITIAL_PRICE  = 25 wei;
     uint256 public constant END_PRICE = 75 wei;
     uint256 public constant INITIAL_SPONSOR_PRICE = 200 wei;

@@ -20,7 +20,7 @@ class MyDapp extends Component {
         etherscan: "https://etherscan.io/",
         twitter: "https://twitter.com/tripscommunity",
         website: "https://web3intravel.com/",
-        discord: "https://discord.gg/tripscommunity",
+        discord: "https://discord.gg/ABEnBKanhA",
         tripsCommunity: "https://www.tripscommunity.com",
         web3Settings: {
             infura: "aec28327c8c04ea7b712b34da8302791",//ldg
