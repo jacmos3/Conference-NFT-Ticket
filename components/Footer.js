@@ -17,6 +17,13 @@ class Footer extends Component {
                         <span>TripsCommunity DAO</span>
                     </a>
 
+                    On
+
+                    <div className={`${styles__footer.img}`} >
+                    <a href="https://gnosischain.com"><img src="../img/gnosischain.png" alt="Gnosis chain" /></a>
+
+                    </div>
+
                     <br/>
                     <br/>
                     Website and Smart Contract's code are

@@ -11,7 +11,7 @@ class SponsorshipForm extends Component{
     successMessage:'',
     coin:"",
     sponsorPrice:0,
-    address:"0xc710e8e155d08F5c9b07722C02221E3f904BE518",
+    address:"0x72AEc41b56F1C3Be0BB4a5b8D599427eDEE6E651",
     checked:true,
     buttonLabel: "Sponsorize!",
     sponsorQuote:"",
@@ -50,6 +50,7 @@ class SponsorshipForm extends Component{
           let totalSupply = parseInt(await instance.methods.totalSupply().call());
           let maxSupply = parseInt(await instance.methods.MAX_ID().call());
           let sponsorPrice = parseInt(await instance.methods.sponsorshipPrice().call());
+          let currentSponsor = parseInt(await instance.methods.sponsorPayment().call())
 
           if (totalSupply >= maxSupply){
             console.log("minting finished");
@@ -58,9 +59,7 @@ class SponsorshipForm extends Component{
           }
 
           //console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + sponsorPrice + " " + paused);
-          this.setState({totalSupply,maxSupply,sponsorPrice});
-
-          this.setState({loading: this.state.loading - 1, errorMessage: ""});
+          this.setState({totalSupply,maxSupply,sponsorPrice,currentSponsor,loading: this.state.loading - 1, errorMessage: ""});
           return sponsorPrice;
       } catch (err) {
         console.log(err);
@@ -76,7 +75,7 @@ class SponsorshipForm extends Component{
     event.preventDefault();
     console.log("sponsorizing");
 
-    this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage: "wait please...", successMessage:""})
+    this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage: "Confirm the transaction on your wallet and then wait for confirmation...", successMessage:""})
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
       const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
@@ -107,7 +106,6 @@ class SponsorshipForm extends Component{
           let uri = await instance.methods.tokenURI(index).call()
           .then((result)=> {
             return JSON.parse(window.atob(result.split(',')[1]));
-
           })
           .catch((error)=>{
             console.log(error);
@@ -143,11 +141,23 @@ class SponsorshipForm extends Component{
 render(){
   return (
     <Container>
-    <h2 className="text-center ">Sponsorship Price: ${this.state.sponsorPrice} xDAI</h2>
-    <br />
+    <h1 className="text-center">Self-sponsorship auction</h1>
+    <h2 className="text-center">Become the Sponsor</h2>
+    <div className={`${styles.text__description}  text-center`}>
+      <p className="text-trips-2">
+      The sponsorship is an ongoing auction. By purchasing it, the current
+    Sponsor quote is placed into all the NFT conference tickets. At anytime any new Sponsor can decide to pay 20% more than what the
+    old Sponsor paid, to replace the Sponsor's quote in all the NFT tickets (those already minted and those that will be minted).
+    The sponsorship mechanism is managed by the conference ticket smart contract and as soon as a new Sponsor pays the upgraded price
+    for acquiring the sponsorship rights, the old Sponsor instantly loses the title and it is 100% refunded. The refund happens
+    automatically, in the exact same blockchain transaction of the new Sponsor payment. If that happens, the old Sponsor got free
+    exposure for the period that passed between his/her purchase and the new Sponsor purchase! <a className={`a__underline__primary`} href="#">Read more... </a>
+    </p>
+    </div>
+
         <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
               <Form.Field>
-              <h3>Insert your quote</h3>
+              <h3>Insert your quote (max 35 chars):</h3>
               <Input
                   error = {true}
                   placeholder='[Insert your company name here]'
@@ -156,22 +166,30 @@ render(){
               </Form.Field>
               <Form.Field>
                 <Message error header="Oops!" content = {this.state.errorMessage} />
-                <Message warning header="Pending..." content = {this.state.warningMessage} />
+                <Message warning header="Pending user confirmation..." content = {this.state.warningMessage} />
                 <Message success header="Success!" content = {this.state.successMessage} />
               </Form.Field>
+                  <h2 className="text-center">Sponsorship price: ${this.state.sponsorPrice} xDAI</h2>
+              <h3 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} xDAI)</h3>
+
 
               <div className={`${styles.buttons__component}`}>
-
                 <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 35}>
                   {this.state.buttonLabel}
                 </button>
                 <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0} >View all</button>
 
-
               </div>
             </Form>
+            <h2 className="text-center text-trips-1">Invoice</h2>
+            <div className={`${styles.text__description}  text-center `}>
+              <p className="text-trips-1">
+                The auctions end at midnight UTC 30th of September. The last standing sponsor can ask for an invoice.
+                The other sponsors will have spent nothing, so no receipt is needed.
+              </p>
+            </div>
             <div style={{padding:"15px"}}>
-              <Card.Group itemsPerRow={3} centered items={this.state.all} />
+              <Card.Group itemsPerRow={3} stackable={true} doubling={true} centered items={this.state.all} />
             </div>
     </Container>
   )

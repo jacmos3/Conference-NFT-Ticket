@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import styles from "../../styles/components/Presentation.module.scss";
+import {Container} from 'semantic-ui-react';
 import Claim from './Claim.js';
 
 class Presentation extends Component {
@@ -14,11 +15,11 @@ class Presentation extends Component {
                     <div className={`${styles.text__content}`}>
                         <h1 className={`${styles.title} text-trips-1 text-center`}>Mint a conference <br />NFT Ticket!</h1>
                         <div className={`${styles.text__description} text-trips-1 text-center`}>
-
+                        <Container>
                         <div className={`${styles.img}`} >
-                          <img width="480px" src={'/img/Ticket.svg'}/>
+                          <img width="400px" src={'/img/Ticket.svg'}/>
                         </div>
-
+                        </Container>
                         <div className={`${styles.button__component}`}>
                             <a href="#Claim">
                                 <button id="btnClaim" className={`btn btn__primary`}  onClick={this.props.connect}>
@@ -32,9 +33,11 @@ class Presentation extends Component {
                                 </button>
                             </a>
                         </div>
+                        <div className="text__content">
+                          <a className={`a__underline__primary`} href="#">Learn more...</a>
+                        </div>
                         </div>
                     </div>
-
                         <div className={`${styles.social__component}`}>
                             { /*
                               <a
@@ -54,8 +57,7 @@ class Presentation extends Component {
                                 target="_blank">
                                 <img className={`btn btn__secondary`} src="../img/social/discord.svg" alt="Discord"/>
                             </a>
-                        </div>
-
+                        </div>                        
                 </div>
             </div>
         )

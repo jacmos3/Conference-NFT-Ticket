@@ -13,7 +13,8 @@
 
 
 .text__content {
-    padding-top: 80px;
+    margin-bottom: 60px;
+    margin-top: 60px;
 }
 
 .button__component {
@@ -41,7 +42,6 @@
       font-size: 99px;
     }
 
-
     .text__description {
       color: white;
       font-family: "Poppins", Sans-serif;
@@ -51,6 +51,7 @@
       -webkit-text-stroke-color: #000;
       stroke: #000;
     }
+
     .img{
       display: flex;
       justify-content: center;

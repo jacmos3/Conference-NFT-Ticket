@@ -11,7 +11,7 @@ class ClaimingForm extends Component{
     successMessage:"",
     coin:"",
     price:0,
-    address:"0xc710e8e155d08F5c9b07722C02221E3f904BE518",
+    address:"0x72AEc41b56F1C3Be0BB4a5b8D599427eDEE6E651",
     checked:true,
     buttonLabel: "Mint",
     all:[],
@@ -29,13 +29,12 @@ class ClaimingForm extends Component{
     console.log(coin);
     this.setState({coin:coin});
 
-    this.fetchInitialInfo();
+    this.fetchInitialInfo(true);
   }
 
-  async fetchInitialInfo() {
-      console.log("fetching ticket price");
-
-      this.setState({loading: this.state.loading + 1, errorMessage: '',successMessage:''});
+  async fetchInitialInfo(firstFetch) {
+      console.log("start initial Info");
+      this.setState({loading: this.state.loading +1, errorMessage: '',successMessage:''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address);
@@ -43,7 +42,7 @@ class ClaimingForm extends Component{
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
-            this.setState({buttonLabel:"Minting paused",loading: this.state.loading + 1});
+            this.setState({buttonLabel:"Minting paused",loading: this.state.loading +1});
             return false;
           }
 
@@ -53,31 +52,34 @@ class ClaimingForm extends Component{
 
           if (totalSupply >= maxSupply){
             console.log("minting finished");
-            this.setState({buttonLabel:"Minting finished",loading: this.state.loading + 1});
+            this.setState({buttonLabel:"Minting finished",loading: this.state.loading +1});
             return false;
           }
 
           //console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + price + " " + paused);
-          this.setState({totalSupply,maxSupply,price});
-
-          this.setState({loading: this.state.loading - 1, errorMessage: ""});
+          this.setState({loading: this.state.loading -1, errorMessage: "",totalSupply,maxSupply,price});
+          console.log("end try Info - success");
+          if (firstFetch){
+            this.fetchNFTList();
+          }
           return price;
       } catch (err) {
         console.log(err);
-          this.setState({loading: this.state.loading - 1, errorMessage: err.message});
+          this.setState({loading: this.state.loading -1, errorMessage: err.message});
+          console.log("end try Info - failed");
           return false;
       }
 
-      this.setState({loading: this.state.loading - 1, errorMessage: ""});
+      this.setState({errorMessage: ""});
+      console.log("end initial Info");
       return true;
   }
 
 
   onMint = async (event) => {
     event.preventDefault();
-    console.log("mint");
-
-    this.setState({loading:this.state.loading+1, errorMessage:'',warningMessage: "wait please...",successMessage:''})
+    console.log("start mint");
+    this.setState({loading:this.state.loading+1, errorMessage:'',warningMessage: "Confirm the transaction on your wallet and then wait for confirmation...",successMessage:''})
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
       const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
@@ -86,17 +88,21 @@ class ClaimingForm extends Component{
       console.log(!this.state.checked ? Math.trunc(this.state.price *1.2).toString() : this.state.price.toString() );
       await instance.methods.claimByPatrons(!this.state.checked).send({from:accounts[0], value:(!this.state.checked ? Math.trunc(this.state.price *1.2).toString() : this.state.price.toString())});
       this.fetchNFTList();
-      this.fetchInitialInfo();
+      this.fetchInitialInfo(false);
       this.setState({successMessage:"Minting successfull! check your ticket below:"});
     }
     catch(err){
       this.setState({errorMessage: err.message,warningMessage: ""});
-      this.fetchInitialInfo();
+      this.fetchInitialInfo(false);
     }
+
+
     this.setState({loading:this.state.loading-1,warningMessage: ""});
+    console.log("end mint");
   }
 
   fetchNFTList = async () => {
+    console.log("start fetching");
       this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage:'',successMessage:''})
       try{
         const accounts= await this.props.state.web3.eth.getAccounts();
@@ -127,7 +133,7 @@ class ClaimingForm extends Component{
             console.log(error);
           });
 
-          let element = {"header": uri.name,"image":uri.image};
+          let element = {"header": <div className="text-center">{uri.name}</div>,"image":uri.image,"extra":<div className="text-center"><a href="https://epor.io/#">Trade on epor.io</a></div>};
           all.push(element);
           console.log(uri);
           this.setState({all:all});
@@ -137,6 +143,7 @@ class ClaimingForm extends Component{
         this.setState({errorMessage: err.message});
       }
       this.setState({loading:this.state.loading-1});
+      console.log("end fetching");
     }
 
   handleClick = (e, { checked }) => {
@@ -153,12 +160,12 @@ class ClaimingForm extends Component{
   render(){
     return (
       <Container>
-      <h2 className="text-center">NFT ticket #{this.state.totalSupply} out of {this.state.maxSupply}</h2>
+      <h2 className="text-center">You are minting NFT ticket #{1 + 1 * this.state.totalSupply}</h2>
       <br />
           <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
                 <Form.Field>
                 <h3>Next ticket cost:</h3>
-                <div >The price increases after every purchase following a bounding curve.</div>
+                <div className={`${styles.marginBottom}`} >The price increases after every purchase following a <a className={`a__underline__primary`} href="#">bonding curve</a>.</div>
                 <Input
                   label={{ basic: true, content: this.state.coin.name, id:"inputLabel" }}
                   labelPosition='right'
@@ -169,8 +176,8 @@ class ClaimingForm extends Component{
                 </Form.Field>
                 <Form.Field className={`${styles.content}`} >
 
-                <h3>Airdrop:</h3>
-                <div>Select this option for airdrop rights after the conference.</div>
+                <h3>Upgrade to <a className={`a__underline__primary`} href="#">AIRDROP TICKET</a>:</h3>
+                <div>Pay 20% extra (optional) to get airdrops of the speaker's projects tokens</div>
                   <Checkbox
                     toggle
                     onClick={this.handleClick}
@@ -178,20 +185,31 @@ class ClaimingForm extends Component{
                 </Form.Field>
                 <Form.Field>
                   <Message error header="Oops!" content = {this.state.errorMessage} />
-                  <Message warning header="Pending..." content = {this.state.warningMessage} />
-                  <Message success header="Pending..." content = {this.state.successMessage} />
+                  <Message warning header="Pending user confirmation..." content = {this.state.warningMessage} />
+                  <Message success header="Success!" content = {this.state.successMessage} />
                 </Form.Field>
 
                 <div className={`${styles.buttons__component}`}>
                   <button onClick = {this.onMint} className={`btn btn__primary`} disabled={this.state.loading > 0}>
                     {this.state.buttonLabel}
                   </button>
-                  <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0}>Refresh</button>
+                  <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0}>Update</button>
                 </div>
               </Form>
-              <div style={{padding:"15px"}}>
-                <Card.Group itemsPerRow={3} centered items={this.state.all} />
-              </div>
+              <br />
+              <h3 className="text-center">Your ticket(s):</h3>
+              {
+                this.state.all.length == 0
+                ?
+                <div className="text-center">Sorry, no tickets found</div>
+                :
+                  <div style={{padding:"15px"}}>
+                    <Card.Group itemsPerRow={3} stackable={true} doubling={true} centered items={this.state.all} />
+                  </div>
+                }
+                <h3 className="text-center">
+                  <a className={`a__underline__primary`} href="#">How to use the tickets to access the conference</a>
+                </h3>
       </Container>
     )
   };
