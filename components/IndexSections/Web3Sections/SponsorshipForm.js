@@ -162,6 +162,7 @@ render(){
                   error = {true}
                   placeholder='[Insert your company name here]'
                   onChange={this.handleChange}
+                  maxLength="35"
               />
               </Form.Field>
               <Form.Field>
