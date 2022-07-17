@@ -11,7 +11,7 @@ class SponsorshipForm extends Component{
     successMessage:'',
     coin:"",
     sponsorPrice:0,
-    address:"0x72AEc41b56F1C3Be0BB4a5b8D599427eDEE6E651",
+    address:"0x924c07526ed4d528f868bb82a164fb95a69e323a",
     checked:true,
     buttonLabel: "Sponsorize!",
     sponsorQuote:"",

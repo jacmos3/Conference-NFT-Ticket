@@ -11,7 +11,7 @@ class ClaimingForm extends Component{
     successMessage:"",
     coin:"",
     price:0,
-    address:"0x72AEc41b56F1C3Be0BB4a5b8D599427eDEE6E651",
+    address:"0x924c07526ed4d528f868bb82a164fb95a69e323a",
     checked:true,
     buttonLabel: "Mint",
     all:[],
@@ -165,7 +165,7 @@ class ClaimingForm extends Component{
           <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
                 <Form.Field>
                 <h3>Next ticket cost:</h3>
-                <div className={`${styles.marginBottom}`} >The price increases after every purchase following a <a className={`a__underline__primary`} href="#">bonding curve</a>.</div>
+                <div className={`${styles.marginBottom}`} >The price increases following a <a className={`a__underline__primary`} href="#">bonding curve</a>.</div>
                 <Input
                   label={{ basic: true, content: this.state.coin.name, id:"inputLabel" }}
                   labelPosition='right'
