@@ -1323,6 +1323,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     string constant private ERR_TOO_MANY_CHARS = "Too many chars, or empty string";
     string constant private ERR_SENT_FAIL = "Failure";
     string constant private ERR_NOT_EXISTS = "Selected tokenId does not exist";
+    string constant private ERR_INPUT_NOT_VALID = "Input not valid. Remove not valid chars";
     mapping(string => string) private details;
     mapping(uint256 => uint256) public prices;
     mapping(uint256 => address) public mintedBy;
@@ -1369,9 +1370,10 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function sponsorship(string memory _quote) external payable nonReentrant {
         require(!paused, ERR_MINTING_PAUSED);
+        require(msg.value == sponsorshipPrice, ERR_INSERT_EXACT);
         uint256 len = bytes(_quote).length;
         require(len > 0 && len <= 35, ERR_TOO_MANY_CHARS);
-        require(msg.value == sponsorshipPrice, ERR_INSERT_EXACT);
+        require(sanitize(_quote), ERR_INPUT_NOT_VALID);
         details[DET_SPONSOR_QUOTE] = _quote;
         details[DET_SPONSOR_QUOTE_LONG] = string(abi.encodePacked(SPONSOR, _quote));
         oldSponsorAddress = sponsorAddress;
@@ -1475,6 +1477,23 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function setSubtitle(string memory _newSubtitle) external onlyOwner{
         details[DET_SUBTITLE] = _newSubtitle;
+    }
+
+    function sanitize(string memory input) public pure returns(bool){
+        uint8 allowedChars = 0;
+        bytes memory byteString = bytes(input);
+        bytes memory allowed = bytes("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ ");  //here you put what character are allowed to use
+        bool exit = false;
+        for(uint8 i=0; i < byteString.length; i++){
+          exit = false;
+           for(uint8 j=0; j < allowed.length && !exit; j++){
+              if(byteString[i]==allowed[j]){
+                allowedChars++;
+                exit = true;
+              }
+           }
+        }
+        return (allowedChars >= byteString.length);
     }
 
     function toAsciiString(address x) internal pure returns (string memory) {

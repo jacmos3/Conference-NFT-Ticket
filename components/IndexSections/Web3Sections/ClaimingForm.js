@@ -11,7 +11,7 @@ class ClaimingForm extends Component{
     successMessage:"",
     coin:"",
     price:0,
-    address:"0x924c07526ed4d528f868bb82a164fb95a69e323a",
+    address:"0xaad62916dd35a52a93360ef77e4a8d447b49dc43",
     checked:true,
     buttonLabel: "Mint",
     all:[],
