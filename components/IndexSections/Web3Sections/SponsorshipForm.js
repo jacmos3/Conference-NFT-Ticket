@@ -135,7 +135,7 @@ class SponsorshipForm extends Component{
   }
 
   handleChange = (e, { value }) => {
-    const result = value.replace(/[^a-z0-9 ]/gi, '');
+    const result = value.replace(/[^a-z0-9 _]/gi, '');
     this.setState({ sponsorQuote:result});
   }
 

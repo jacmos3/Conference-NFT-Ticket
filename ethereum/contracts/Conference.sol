@@ -1482,18 +1482,18 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     function sanitize(string memory input) public pure returns(bool){
         uint8 allowedChars = 0;
         bytes memory byteString = bytes(input);
-        bytes memory allowed = bytes("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ ");  //here you put what character are allowed to use
+        bytes memory allowed = bytes("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ ");
         bool exit = false;
         for(uint8 i=0; i < byteString.length; i++){
           exit = false;
            for(uint8 j=0; j < allowed.length && !exit; j++){
-              if(byteString[i]==allowed[j]){
+              if(byteString[i] == allowed[j]){
                 allowedChars++;
                 exit = true;
               }
            }
         }
-        return (allowedChars >= byteString.length);
+        return allowedChars >= byteString.length;
     }
 
     function toAsciiString(address x) internal pure returns (string memory) {
