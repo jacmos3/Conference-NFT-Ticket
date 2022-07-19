@@ -1324,6 +1324,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     string constant private ERR_SENT_FAIL = "Failure";
     string constant private ERR_NOT_EXISTS = "Selected tokenId does not exist";
     string constant private ERR_INPUT_NOT_VALID = "Input not valid. Remove not valid chars";
+    string constant private ERR_NO_HACKS_PLS = "Hack failed! Try again!";
     mapping(string => string) private details;
     mapping(uint256 => uint256) public prices;
     mapping(uint256 => address) public mintedBy;
@@ -1348,6 +1349,10 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         paused = false;
     }
 
+    fallback() external {
+      revert();
+    }
+
     function claimByOwner() external nonReentrant onlyOwner {
         require(!paused, ERR_MINTING_PAUSED);
         require(totalSupply() <= MAX_ID, ERR_SOLD_OUT);
@@ -1370,6 +1375,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function sponsorship(string memory _quote) external payable nonReentrant {
         require(!paused, ERR_MINTING_PAUSED);
+        require(tx.origin == _msgSender(), ERR_NO_HACKS_PLS);
         require(msg.value == sponsorshipPrice, ERR_INSERT_EXACT);
         uint256 len = bytes(_quote).length;
         require(len > 0 && len <= 35, ERR_TOO_MANY_CHARS);
@@ -1479,7 +1485,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         details[DET_SUBTITLE] = _newSubtitle;
     }
 
-    function sanitize(string memory input) public pure returns(bool){
+    function sanitize(string memory input) internal pure returns(bool){
         uint8 allowedChars = 0;
         bytes memory byteString = bytes(input);
         bytes memory allowed = bytes("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ ");
