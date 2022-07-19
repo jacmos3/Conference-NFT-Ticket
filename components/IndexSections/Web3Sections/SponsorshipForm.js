@@ -11,7 +11,6 @@ class SponsorshipForm extends Component{
     successMessage:'',
     coin:"",
     sponsorPrice:0,
-    address:"0xaad62916dd35a52a93360ef77e4a8d447b49dc43",
     checked:true,
     buttonLabel: "Sponsorize!",
     sponsorQuote:"",
@@ -38,7 +37,7 @@ class SponsorshipForm extends Component{
       this.setState({loading: this.state.loading + 1, errorMessage: ''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
-          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address);
+          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress);
           console.log("retrieving ticket price");
           let paused = await instance.methods.paused().call();
           if (paused){
@@ -78,7 +77,7 @@ class SponsorshipForm extends Component{
     this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage: "Confirm the transaction on your wallet and then wait for confirmation...", successMessage:""})
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
-      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
+      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress );
       //console.log(this.props.state.web3.utils.fromWei(this.state.checked ? this.state.price.toString() : Math.trunc(this.state.price *1.2).toString()));
       //await instance.methods.claimByPatrons(this.state.checked).send({from:accounts[0], value:(this.props.state.web3.utils.fromWei(this.state.checked ? this.state.price.toString() : Math.trunc(this.state.price *1.2).toString()))});
       console.log("quote:" + this.state.sponsorQuote.toString() );
@@ -99,7 +98,7 @@ class SponsorshipForm extends Component{
       this.setState({loading:this.state.loading+1, errorMessage:'',successMessage:''})
       try{
         const accounts= await this.props.state.web3.eth.getAccounts();
-        const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.address );
+        const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress );
         let totalSupply = parseInt(await instance.methods.totalSupply().call());
         let all = [];
         for (let index = 1; index <= totalSupply; index++){
