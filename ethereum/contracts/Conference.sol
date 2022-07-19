@@ -1353,7 +1353,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
       revert();
     }
 
-    function claimByOwner() external nonReentrant onlyOwner {
+    function claimByOwner() external onlyOwner {
         require(!paused, ERR_MINTING_PAUSED);
         require(totalSupply() <= MAX_ID, ERR_SOLD_OUT);
         uint256 tokenId = totalSupply() +1;
