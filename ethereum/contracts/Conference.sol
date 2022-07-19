@@ -1502,6 +1502,10 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         return allowedChars >= byteString.length;
     }
 
+    function detailCheck(string memory _detail) external view returns (string memory){
+      return details[_detail];
+    }
+
     function toAsciiString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint i = 0; i < 20; i++) {
