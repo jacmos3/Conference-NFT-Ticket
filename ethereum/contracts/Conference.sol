@@ -1293,6 +1293,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     //uint256 private constant EXP = 10**18;
     uint256 private constant EXP = 1; //for testing
     uint256 private sumIncrement = 0;
+    uint256 private dateTime;
     uint256 public price;
     uint256 public sponsorshipPrice;
     uint256 public oldSponsorPayment;
@@ -1325,10 +1326,20 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     string constant private ERR_NOT_EXISTS = "Selected tokenId does not exist";
     string constant private ERR_INPUT_NOT_VALID = "Input not valid. Remove not valid chars";
     string constant private ERR_NO_HACKS_PLS = "Hack failed! Try again!";
+    string constant private ERR_TIME_EXPIRED = "Time expired";
     mapping(string => string) private details;
     mapping(uint256 => uint256) public prices;
     mapping(uint256 => address) public mintedBy;
     mapping(uint256 => bool) public airdrop;
+    event Refunded(address indexed oldSponsorAddress, uint256 oldSponsorPayment);
+    event NewSponsorship(address indexed sender, uint256 indexed amount, string _quote);
+    event Minting(address indexed sender, uint256 indexed tokenId, uint256 msgValue, bool indexed airdrop);
+    event MintingByOwner(address indexed sender, uint256 indexed tokenId);
+    event DetailChanged(string indexed detail, string oldValue, string newValue);
+    event ExpirationChanged(uint256 dateTime, uint256 _dateTime);
+    event Withdraw(address indexed owner, address indexed trasurer, uint256 amount);
+    event NewTreasurer(address indexed oldTreasurer, address indexed newTreasurer);
+    event Paused(bool paused);
 
     constructor() ERC721("Web3 In Travel NFT Ticket", "WEB3INTRAVEL") Ownable(){
         details[DET_TITLE] = "WEB3 IN TRAVEL SUMMIT";
@@ -1347,36 +1358,43 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         price = INITIAL_PRICE;
         treasurer = 0xce73904422880604e78591fD6c758B0D5106dD50; //TripsCommunity address
         paused = false;
-    }
-
-    fallback() external {
-      revert();
+        dateTime = 1664582399; //30 september 23.59.59 UTC
     }
 
     function claimByOwner() external onlyOwner {
         require(!paused, ERR_MINTING_PAUSED);
-        require(totalSupply() < MAX_ID, ERR_SOLD_OUT);
-        uint256 tokenId = totalSupply() +1;
-        mintedBy[tokenId] = _msgSender();
-        _safeMint(_msgSender(), tokenId);
+        uint256 _tokenId = totalSupply() +1;
+        require(_tokenId <= MAX_ID, ERR_SOLD_OUT);
+        require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
+        address _sender = _msgSender();
+        mintedBy[_tokenId] = _sender;
+        emit MintingByOwner(_sender, _tokenId);
+        _safeMint(_sender, _tokenId);
     }
 
     function claimByPatrons(bool _airdrop) external payable nonReentrant {
         require(!paused, ERR_MINTING_PAUSED);
-        require(totalSupply() < MAX_ID, ERR_SOLD_OUT);
-        require(_airdrop ? msg.value == (price + price / 5) : msg.value == price, ERR_INSERT_EXACT);
-        uint256 tokenId = totalSupply() +1;
-        prices[tokenId] = msg.value;
-        mintedBy[tokenId] = _msgSender();
-        airdrop[tokenId] = _airdrop;
+        uint256 _tokenId = totalSupply() +1;
+        require(_tokenId <= MAX_ID, ERR_SOLD_OUT);
+        require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
+        address _sender = _msgSender();
+        require(tx.origin == _sender, ERR_NO_HACKS_PLS);
+        uint256 _msgValue = msg.value;
+        require(_airdrop ? _msgValue == (price + price / 5) : _msgValue == price, ERR_INSERT_EXACT);
+        prices[_tokenId] = _msgValue;
+        mintedBy[_tokenId] = _sender;
+        airdrop[_tokenId] = _airdrop;
         sumIncrement += ((END_PRICE - INITIAL_PRICE) - sumIncrement)/10;
         price = INITIAL_PRICE + (sumIncrement / EXP)*EXP;
-        _safeMint(_msgSender(), tokenId);
+        emit Minting(_sender, _tokenId, _msgValue, _airdrop);
+        _safeMint(_sender, _tokenId);
     }
 
     function sponsorship(string memory _quote) external payable nonReentrant {
         require(!paused, ERR_MINTING_PAUSED);
-        require(tx.origin == _msgSender(), ERR_NO_HACKS_PLS);
+        require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
+        address _sender = _msgSender();
+        require(tx.origin == _sender, ERR_NO_HACKS_PLS);
         require(msg.value == sponsorshipPrice, ERR_INSERT_EXACT);
         uint256 len = bytes(_quote).length;
         require(len > 0 && len <= 35, ERR_TOO_MANY_CHARS);
@@ -1385,13 +1403,15 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         details[DET_SPONSOR_QUOTE_LONG] = string(abi.encodePacked(SPONSOR, _quote));
         oldSponsorAddress = sponsorAddress;
         oldSponsorPayment = sponsorPayment;
-        sponsorAddress = _msgSender();
+        sponsorAddress = _sender;
         sponsorPayment = sponsorshipPrice;
         sponsorshipPrice = (sponsorshipPrice * 12) / 10;
         if (oldSponsorPayment > 0){
             (bool sent,) = payable(oldSponsorAddress).call{value:oldSponsorPayment}("");
             require(sent, ERR_SENT_FAIL);
+            emit Refunded(oldSponsorAddress, oldSponsorPayment);
         }
+        emit NewSponsorship(_sender, sponsorPayment, _quote);
     }
 
     function tokenURI(uint256 _tokenId) override public view returns (string memory) {
@@ -1440,49 +1460,74 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
 
     function withdraw() external onlyOwner {
-      payable(treasurer).transfer(address(this).balance);
+        uint256 amount = address(this).balance;
+        payable(treasurer).transfer(amount);
+        emit Withdraw(msg.sender, treasurer, amount);
     }
 
     function setTreasurer(address _newAddress) external onlyOwner{
-      treasurer = _newAddress;
+        emit NewTreasurer(treasurer, _newAddress);
+        treasurer = _newAddress;
     }
 
     function setSponsorQuote(string memory _quote) external onlyOwner{
+      emit DetailChanged(DET_SPONSOR_QUOTE, details[DET_SPONSOR_QUOTE], _quote);
+      emit DetailChanged(DET_SPONSOR_QUOTE_LONG, details[DET_SPONSOR_QUOTE_LONG], _quote);
       details[DET_SPONSOR_QUOTE] = _quote;
       details[DET_SPONSOR_QUOTE_LONG] = string(abi.encodePacked(SPONSOR,_quote));
     }
 
     function pauseUnpause() external onlyOwner{
         paused = !paused;
+        emit Paused(paused);
     }
 
-    function setDate(string memory _newDate, string memory _newDateLong) external onlyOwner{
-        details[DET_DATE] = _newDate;
-        details[DET_DATE_LONG] = _newDateLong;
-    }
 
-    function setTime(string memory _newTime, string memory _newTimeLong) external onlyOwner{
-        details[DET_TIME] = _newTime;
-        details[DET_TIME_LONG] = _newTimeLong;
+    function setDateTime(string memory _newDate, string memory _newDateLong, string memory _newTime, string memory _newTimeLong, uint256 _dateTime) external onlyOwner{
+        if (bytes(_newDate).length > 0) {
+          emit DetailChanged(DET_DATE, details[DET_DATE], _newDate);
+          details[DET_DATE] = _newDate;
+        }
+        if (bytes(_newDateLong).length > 0) {
+          emit DetailChanged(DET_DATE_LONG, details[DET_DATE_LONG], _newDateLong);
+          details[DET_DATE_LONG] = _newDateLong;
+        }
+        if (bytes(_newTime).length > 0) {
+          emit DetailChanged(DET_TIME, details[DET_TIME], _newTime);
+          details[DET_TIME] = _newTime;
+        }
+        if (bytes(_newTimeLong).length > 0) {
+          emit DetailChanged(DET_TIME_LONG, details[DET_TIME_LONG], _newTimeLong);
+          details[DET_TIME_LONG] = _newTimeLong;
+        }
+        if (_dateTime > 0){
+          emit ExpirationChanged(dateTime, _dateTime);
+          dateTime = _dateTime;
+        }
     }
 
     function setAddressLocation(string memory _newAddressLocation) external onlyOwner{
+        emit DetailChanged(DET_ADDRESS_LOCATION, details[DET_ADDRESS_LOCATION], _newAddressLocation);
         details[DET_ADDRESS_LOCATION] = _newAddressLocation;
     }
 
     function setCity(string memory _newCity) external onlyOwner{
+        emit DetailChanged(DET_CITY, details[DET_CITY], _newCity);
         details[DET_CITY] = _newCity;
     }
 
     function setLogo(string memory _newLogo) external onlyOwner{
+        emit DetailChanged(DET_LOGO, details[DET_LOGO], _newLogo);
         details[DET_LOGO] = _newLogo;
     }
 
     function setTitle(string memory _newTitle) external onlyOwner{
+        emit DetailChanged(DET_TITLE, details[DET_TITLE], _newTitle);
         details[DET_TITLE] = _newTitle;
     }
 
     function setSubtitle(string memory _newSubtitle) external onlyOwner{
+        emit DetailChanged(DET_SUBTITLE, details[DET_SUBTITLE], _newSubtitle);
         details[DET_SUBTITLE] = _newSubtitle;
     }
 
