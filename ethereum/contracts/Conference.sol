@@ -1355,7 +1355,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function claimByOwner() external onlyOwner {
         require(!paused, ERR_MINTING_PAUSED);
-        require(totalSupply() <= MAX_ID, ERR_SOLD_OUT);
+        require(totalSupply() < MAX_ID, ERR_SOLD_OUT);
         uint256 tokenId = totalSupply() +1;
         mintedBy[tokenId] = _msgSender();
         _safeMint(_msgSender(), tokenId);
@@ -1363,6 +1363,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function claimByPatrons(bool _airdrop) external payable nonReentrant {
         require(!paused, ERR_MINTING_PAUSED);
+        require(totalSupply() < MAX_ID, ERR_SOLD_OUT);
         require(_airdrop ? msg.value == (price + price / 5) : msg.value == price, ERR_INSERT_EXACT);
         uint256 tokenId = totalSupply() +1;
         prices[tokenId] = msg.value;
