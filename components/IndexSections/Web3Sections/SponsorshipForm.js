@@ -151,15 +151,28 @@ render(){
     <div className={`${styles.text__description}  text-center border-solid border-4 border-indigo-800 `}>
            <h3 className="text-center text-trips-1">Rules</h3>
       <p className="text-indigo-800">
-      The sponsorship is an ongoing auction.
-      By purchasing it, you can write a sentence to place into the NFT conference tickets.
-      At anytime any new Sponsor can decide to pay 20% more than what you paid, and his/her sentence will replace your sentence in all the NFT tickets (those already minted and those that will be minted).
-      The sponsorship mechanism is managed by the conference ticket smart contract and as soon as a new Sponsor pays the upgraded price
-      for acquiring the sponsorship rights, you will instantly lose the Sponsor title, and you'll be 100% refunded.
-      The refund happens automatically, in the same blockchain transaction of the new Sponsor payment.
-      When it happens, you got free exposure for the period that passed between your purchase and the new Sponsor purchase!
-      <a className={`a__underline__primary`} href={this.props.state.web3Settings.lnk_spnsr_read_more}> Read more... </a>
-    </p>
+        <strong>The sponsorship is an ongoing auction.</strong>
+      </p>
+      <p className= "text-indigo-800">By purchasing it, <strong>you can write a sentence </strong> (usually your company name)
+        into the NFT conference tickets.
+      </p>
+      <p className= "text-indigo-800">
+        During the auction period, any new Sponsor can decide to pay 20% more than what you paid,
+        <br />In this case their sentence will replace yours <strong>in all the NFT tickets </strong> (those already minted and those that will be minted).
+      </p>
+      <p className="text-indigo-800">As soon as a new Sponsor pays the upgraded price for acquiring the sponsorship rights, you will:
+        <br /><strong>- instantly lose the Sponsor title</strong>
+        <br /><strong>- be 100% refunded.</strong>
+      </p>
+      <p className="text-indigo-800"><strong>The refund happens automatically</strong>, in the same blockchain transaction of the new Sponsor payment.
+      </p>
+      <p className="text-indigo-800">If it happens, you got free exposure for the period that passed
+        <br />between your purchase and the new Sponsor purchase,
+        <br />resulting as a temporary free advertisement!
+      </p>
+      <p className="text-indigo-800">
+        <a className={`a__underline__primary`} href={this.props.state.web3Settings.lnk_spnsr_read_more}> Read more... </a>
+      </p>
     <br />
      <h3 className="text-center text-trips-1">Invoice</h3>
        <p className="text-indigo-800">
@@ -167,14 +180,15 @@ render(){
          <br />The last standing sponsor can ask for an invoice.
          <br />The other temporary sponsors will have spent nothing and no receipts are needed.
        </p>
-
+       <a href ="#Sponsorize">
        <Checkbox
           className={`${styles.checkbox} `}
           label='I have read and understood!'
           onChange={this.setChecked}
         />
+        </a>
     </div>
-    <h2 className="text-center">Become the Sponsor</h2>
+    <h2 id="Sponsorize" className="text-center">Become the Sponsor</h2>
         <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
               <Form.Field>
               <Input
@@ -192,7 +206,7 @@ render(){
                 <Message success header="Success!" content = {this.state.successMessage} />
               </Form.Field>
                   <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} xDAI</h3>
-                  {this.state.sponsorPrice != 0
+                  {this.state.currentSponsor != 0
                     ? <h4 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} xDAI)</h4>
                     : <div></div>
                   }
