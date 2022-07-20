@@ -16,7 +16,7 @@ import styles from "../styles/pages/INDEX.module.scss";
 
 class MyDapp extends Component {
     state = {
-        opensea: "https://testnets.opensea.io/collection/web3-in-travel-nft-ticket-tbv0qt7nou",
+        marketplace: "https://testnets.opensea.io/collection/web3-in-travel-nft-ticket-tbv0qt7nou",
         etherscan: "https://etherscan.io/",
         twitter: "https://twitter.com/tripscommunity",
         website: "https://web3intravel.com/",
@@ -25,10 +25,16 @@ class MyDapp extends Component {
         web3Settings: {
             infura: "aec28327c8c04ea7b712b34da8302791",//ldg
             isWeb3Connected: false,
+            lnk_bondingCurve:"#1",
+            lnk_airdrop:"#2",
+            lnk_how_to_access:"#3",
+            lnk_marketplace:"#4",
+            lnk_spnsr_read_more:"#5",
+
             chains: [
                 {
                   name:"Rinkeby", id:4,
-                  opensea:"https://testnets.opensea.io/collection/web3-in-travel-nft-ticket-tbv0qt7nou",
+                  marketplace:"https://testnets.opensea.io/collection/web3-in-travel-nft-ticket-tbv0qt7nou",
                   openseaCard:"https://testnets.opensea.io/assets/",
                   options:{
                     coin:{

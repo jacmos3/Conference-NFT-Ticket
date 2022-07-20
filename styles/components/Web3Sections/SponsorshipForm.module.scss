@@ -8,6 +8,10 @@
   display: flex;
   flex-flow: row;
   justify-content: center;
+  margin: 30px;
+}
+.checkbox{
+  margin:30px;
 }
 .content{
   h3{
@@ -24,6 +28,8 @@
   line-height: 20px;
   -webkit-text-stroke-color: #000;
   stroke: #000;
+  padding: 15px;
+  margin: 35px;
 }
 
 @media (max-width: 767px) {

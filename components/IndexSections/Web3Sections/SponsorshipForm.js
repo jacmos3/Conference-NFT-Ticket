@@ -101,7 +101,9 @@ class SponsorshipForm extends Component{
         const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress );
         let totalSupply = parseInt(await instance.methods.totalSupply().call());
         let all = [];
-        for (let index = 1; index <= totalSupply; index++){
+        let start = totalSupply == 0 ? 0 : 1;
+
+        for (let index = start; index <= totalSupply && index <= 20; index++){
           let uri = await instance.methods.tokenURI(index).call()
           .then((result)=> {
             return JSON.parse(window.atob(result.split(',')[1]));
@@ -138,32 +140,50 @@ class SponsorshipForm extends Component{
     this.setState({ sponsorQuote:result});
   }
 
+  setChecked = (e, data) => {
+    this.setState({understood:data.checked});
+  }
+
 render(){
   return (
     <Container>
     <h1 className="text-center">Self-sponsorship auction</h1>
-    <h2 className="text-center">Become the Sponsor</h2>
-    <div className={`${styles.text__description}  text-center`}>
-      <p className="text-trips-2">
-      The sponsorship is an ongoing auction. By purchasing it, the current
-    Sponsor quote is placed into all the NFT conference tickets. At anytime any new Sponsor can decide to pay 20% more than what the
-    old Sponsor paid, to replace the Sponsor's quote in all the NFT tickets (those already minted and those that will be minted).
-    The sponsorship mechanism is managed by the conference ticket smart contract and as soon as a new Sponsor pays the upgraded price
-    for acquiring the sponsorship rights, the old Sponsor instantly loses the title and it is 100% refunded. The refund happens
-    automatically, in the exact same blockchain transaction of the new Sponsor payment. If that happens, the old Sponsor got free
-    exposure for the period that passed between his/her purchase and the new Sponsor purchase! <a className={`a__underline__primary`} href="#">Read more... </a>
+    <div className={`${styles.text__description}  text-center border-solid border-4 border-indigo-800 `}>
+           <h3 className="text-center text-trips-1">Rules</h3>
+      <p className="text-indigo-800">
+      The sponsorship is an ongoing auction.
+      By purchasing it, you can write a sentence to place into the NFT conference tickets.
+      At anytime any new Sponsor can decide to pay 20% more than what you paid, and his/her sentence will replace your sentence in all the NFT tickets (those already minted and those that will be minted).
+      The sponsorship mechanism is managed by the conference ticket smart contract and as soon as a new Sponsor pays the upgraded price
+      for acquiring the sponsorship rights, you will instantly lose the Sponsor title, and you'll be 100% refunded.
+      The refund happens automatically, in the same blockchain transaction of the new Sponsor payment.
+      When it happens, you got free exposure for the period that passed between your purchase and the new Sponsor purchase!
+      <a className={`a__underline__primary`} href={this.props.state.web3Settings.lnk_spnsr_read_more}> Read more... </a>
     </p>
-    </div>
+    <br />
+     <h3 className="text-center text-trips-1">Invoice</h3>
+       <p className="text-indigo-800">
+         The auction ends at midnight UTC 30th of September.
+         <br />The last standing sponsor can ask for an invoice.
+         <br />The other temporary sponsors will have spent nothing and no receipts are needed.
+       </p>
 
+       <Checkbox
+          className={`${styles.checkbox} `}
+          label='I have read and understood!'
+          onChange={this.setChecked}
+        />
+    </div>
+    <h2 className="text-center">Become the Sponsor</h2>
         <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
               <Form.Field>
-              <h3>Insert your quote (max 35 chars):</h3>
               <Input
                   error = {true}
-                  placeholder='[Insert your company name here]'
+                  placeholder='[Insert your company name or your sponsor sentence. Max 35 length]'
                   onChange={this.handleChange}
                   maxLength="35"
                   value = {this.state.sponsorQuote}
+                  disabled = {!this.state.understood}
               />
               </Form.Field>
               <Form.Field>
@@ -171,25 +191,22 @@ render(){
                 <Message warning header="Pending user confirmation..." content = {this.state.warningMessage} />
                 <Message success header="Success!" content = {this.state.successMessage} />
               </Form.Field>
-                  <h2 className="text-center">Sponsorship price: ${this.state.sponsorPrice} xDAI</h2>
-              <h3 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} xDAI)</h3>
+                  <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} xDAI</h3>
+                  {this.state.sponsorPrice != 0
+                    ? <h4 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} xDAI)</h4>
+                    : <div></div>
+                  }
 
 
               <div className={`${styles.buttons__component}`}>
-                <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 35}>
+                <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 35 || !this.state.understood}>
                   {this.state.buttonLabel}
                 </button>
-                <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0} >View all</button>
+                <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0 || !this.state.understood} >Example</button>
 
               </div>
             </Form>
-            <h2 className="text-center text-trips-1">Invoice</h2>
-            <div className={`${styles.text__description}  text-center `}>
-              <p className="text-trips-1">
-                The auctions end at midnight UTC 30th of September. The last standing sponsor can ask for an invoice.
-                The other sponsors will have spent nothing, so no receipt is needed.
-              </p>
-            </div>
+
             <div style={{padding:"15px"}}>
               <Card.Group itemsPerRow={3} stackable={true} doubling={true} centered items={this.state.all} />
             </div>

@@ -132,7 +132,10 @@ class ClaimingForm extends Component{
             console.log(error);
           });
 
-          let element = {"header": <div className="text-center">{uri.name}</div>,"image":uri.image,"extra":<div className="text-center"><a href="https://epor.io/#">Trade on epor.io</a></div>};
+          let element = {
+            "header": <div className="text-center">{uri.name}</div>,
+            "image":uri.image,
+            "extra":<div className="text-center"><a href={this.props.state.web3Settings.lnk_marketplace}>Trade on secondary market</a></div>};
           all.push(element);
           //console.log(uri);
           this.setState({all:all});
@@ -164,7 +167,7 @@ class ClaimingForm extends Component{
           <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
                 <Form.Field>
                 <h3>Next ticket cost:</h3>
-                <div className={`${styles.marginBottom}`} >The price increases following a <a className={`a__underline__primary`} href="#">bonding curve</a>.</div>
+                <div className={`${styles.marginBottom}`} >The price increases following a <a className={`a__underline__primary`} href={this.props.state.web3Settings.lnk_bondingCurve}>bonding curve</a>.</div>
                 <Input
                   label={{ basic: true, content: this.state.coin.name, id:"inputLabel" }}
                   labelPosition='right'
@@ -175,7 +178,7 @@ class ClaimingForm extends Component{
                 </Form.Field>
                 <Form.Field className={`${styles.content}`} >
 
-                <h3>Upgrade to <a className={`a__underline__primary`} href="#">AIRDROP TICKET</a>:</h3>
+                <h3>Upgrade to <a className={`a__underline__primary`} href={this.props.state.web3Settings.lnk_airdrop}>AIRDROP TICKET</a>:</h3>
                 <div>Pay 20% extra (optional) to get airdrops of the speaker's projects tokens</div>
                   <Checkbox
                     toggle
@@ -207,7 +210,7 @@ class ClaimingForm extends Component{
                   </div>
                 }
                 <h3 className="text-center">
-                  <a className={`a__underline__primary`} href="#">How to use the tickets to access the conference</a>
+                  <a className={`a__underline__primary`} href={this.props.state.web3Settings.lnk_how_to_access}>How to use the tickets to access the conference</a>
                 </h3>
       </Container>
     )

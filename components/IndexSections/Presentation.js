@@ -41,9 +41,9 @@ class Presentation extends Component {
                         <div className={`${styles.social__component}`}>
                             { /*
                               <a
-                                href={this.props.state.opensea}
+                                href={this.props.state.marketplace}
                                 target="_blank">
-                                <img className={`btn btn__secondary`} src="../img/social/opensea.svg" alt="Opensea"/>
+                                <img className={`btn btn__secondary`} src="../img/social/marketplace.svg" alt="marketplace"/>
                             </a>
                             */
                             }
@@ -57,7 +57,7 @@ class Presentation extends Component {
                                 target="_blank">
                                 <img className={`btn btn__secondary`} src="../img/social/discord.svg" alt="Discord"/>
                             </a>
-                        </div>                        
+                        </div>
                 </div>
             </div>
         )
