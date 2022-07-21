@@ -24,17 +24,12 @@ class SponsorshipForm extends Component{
     var coin = this.props.state.web3Settings.chains
       .filter(chain => chain.id === this.props.state.web3Settings.networkId)
       .map(chain => chain.options.coin)[0];
-    console.log("filter done");
-    console.log(coin);
     this.setState({coin:coin});
-
     this.fetchInitialInfo();
-    console.log("")
   }
 
   async fetchInitialInfo() {
       console.log("fetching ticket price");
-
       this.setState({loading: this.state.loading + 1, errorMessage: ''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
@@ -60,8 +55,7 @@ class SponsorshipForm extends Component{
             console.log(error);
           });
 
-          let temp = this.replaceText(uri.image,"[PUT YOUR COMPANY NAME HERE]");
-          let element = {"header":"FAC-SIMILE NFT TICKET","image":temp};
+          let element = {"header":"FAC-SIMILE NFT TICKET","image":uri.image};
           this.setState({element});
 
           if (totalSupply >= maxSupply){
@@ -165,6 +159,13 @@ render(){
        </p>
         <div>
           <h3 className="text-center text-trips-1">Preview</h3>
+          <p className="text-indigo-800">
+          This is a fac-simile NFT ticket containing the current sponsor quote.
+          <br />Please note: this is an example NFT. By becoming a sponsor you are <strong>not</strong> going to mint any NFT.
+          <br /><strong>Becoming Sponsor</strong> means <strong>replacing</strong> the current Sponsor quote <strong>with your Company Name</strong> (or quote) into the NFTs.
+          <br />Your sentence will appear in all the {this.state.totalSupply} Conference Ticket NFTs already minted and in any NFT ticket that will be minted.
+
+          </p>
           <div className={`${styles.centerCard}`}>
             {this.state.element.header.length > 0
               ? <Card >
