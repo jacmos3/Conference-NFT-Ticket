@@ -4,14 +4,17 @@
   padding: 10px !important;
 }
 
-.buttons__component {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  margin: 30px;
-}
 .checkbox{
   margin:30px;
+}
+
+.centerCard{
+  padding:20px;
+  display: flex;
+  justify-content: center;
+}
+.padding{
+  padding: 10px;
 }
 .content{
   h3{

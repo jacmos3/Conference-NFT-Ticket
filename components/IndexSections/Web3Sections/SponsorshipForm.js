@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import {Form,Field,Input,Message,Button,Container,Checkbox,Card} from 'semantic-ui-react';
+import {Form,Field,Input,Message,Button,Container,Checkbox,Card,Image} from 'semantic-ui-react';
 import Conference from '../../../ethereum/build/Conference.sol.json';
 import styles from "../../../styles/components/Web3Sections/SponsorshipForm.module.scss";
-
+import Ticket from '../../../public/img/Ticket.svg'
 class SponsorshipForm extends Component{
   state = {
     loading:0,
@@ -14,7 +14,7 @@ class SponsorshipForm extends Component{
     checked:true,
     buttonLabel: "Sponsorize!",
     sponsorQuote:"",
-    all:[]
+    element:{image:"",header:""}
   }
   constructor(props){
     super(props);
@@ -29,6 +29,7 @@ class SponsorshipForm extends Component{
     this.setState({coin:coin});
 
     this.fetchInitialInfo();
+    console.log("")
   }
 
   async fetchInitialInfo() {
@@ -51,13 +52,24 @@ class SponsorshipForm extends Component{
           let sponsorPrice = parseInt(await instance.methods.sponsorshipPrice().call());
           let currentSponsor = parseInt(await instance.methods.sponsorPayment().call())
 
+          let uri = await instance.methods.tokenURI(0).call()
+          .then((result)=> {
+            return JSON.parse(window.atob(result.split(',')[1]));
+          })
+          .catch((error)=>{
+            console.log(error);
+          });
+
+          let temp = this.replaceText(uri.image,"[PUT YOUR COMPANY NAME HERE]");
+          let element = {"header":"FAC-SIMILE NFT TICKET","image":temp};
+          this.setState({element});
+
           if (totalSupply >= maxSupply){
             console.log("minting finished");
             this.setState({buttonLabel:"Time ended",loading:this.state.loading + 1});
             return false;
           }
 
-          //console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + sponsorPrice + " " + paused);
           this.setState({totalSupply,maxSupply,sponsorPrice,currentSponsor,loading: this.state.loading - 1, errorMessage: ""});
           return sponsorPrice;
       } catch (err) {
@@ -82,62 +94,33 @@ class SponsorshipForm extends Component{
       //await instance.methods.claimByPatrons(this.state.checked).send({from:accounts[0], value:(this.props.state.web3.utils.fromWei(this.state.checked ? this.state.price.toString() : Math.trunc(this.state.price *1.2).toString()))});
       console.log("quote:" + this.state.sponsorQuote.toString() );
       await instance.methods.sponsorship(this.state.sponsorQuote.toString()).send({from:accounts[0], value:this.state.sponsorPrice.toString()});
-      this.fetchNFTList();
-      this.fetchInitialInfo();
-      this.setState({successMessage:"Sponsorizing successfull! check the result below:"});
+      this.setState({successMessage:"Sponsorizing successfull! Your quote is now in all the conference NFT tickets!"});
     }
     catch(err){
       //console.log(err);
       this.setState({errorMessage: err.message,warningMessage:"",successMessage:''});
-      this.fetchInitialInfo();
     }
+    this.fetchInitialInfo();
     this.setState({loading:this.state.loading-1, warningMessage:""});
   }
 
-  fetchNFTList = async () => {
-      this.setState({loading:this.state.loading+1, errorMessage:'',successMessage:''})
-      try{
-        const accounts= await this.props.state.web3.eth.getAccounts();
-        const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress );
-        let totalSupply = parseInt(await instance.methods.totalSupply().call());
-        let all = [];
-        let start = totalSupply == 0 ? 0 : 1;
-
-        for (let index = start; index <= totalSupply && index <= 20; index++){
-          let uri = await instance.methods.tokenURI(index).call()
-          .then((result)=> {
-            return JSON.parse(window.atob(result.split(',')[1]));
-          })
-          .catch((error)=>{
-            console.log(error);
-          });
-
-          console.log("test"+uri);
-          let element = {"header": uri.name,"image":uri.image};
-          all.push(element);
-          this.setState({all:all});
-        }
-
-      }catch(err){
-        this.setState({errorMessage: err.message});
-      }
-      this.setState({loading:this.state.loading-1});
-    }
-
-  handleClick = (e, { checked }) => {
-    //console.log("cheked: " + checked);
-    this.setState({checked:!checked});
-  }
-
-  onChange(event){
-    event.preventDefault();
-    //console.log(event.target.value * this.state.coin.amount);
-    this.setState({howManyLT: event.target.value});
+  replaceText(svg,string){
+    let image = svg.split(',');
+    let temp = window.atob(image[1]);
+    return image[0] + "," + window.btoa(temp.replace(/(?<=SPONSOR: )(.*?)(?=<)/, string));
   }
 
   handleChange = (e, { value }) => {
-    const result = value.replace(/[^a-z0-9 _]/gi, '');
+    const result = value.replace(/[^a-z0-9 _.,:;!?$()\[\]{}\-\+\*]/gi, '');
     this.setState({ sponsorQuote:result});
+    try{
+
+        let temp = this.replaceText(this.state.element.image,result);
+        let element = {"header": this.state.element.header,"image":temp};
+        this.setState({element});
+    }catch(err){
+      this.setState({errorMessage: err.message});
+    }
   }
 
   setChecked = (e, data) => {
@@ -180,22 +163,44 @@ render(){
          <br />The last standing sponsor can ask for an invoice.
          <br />The other temporary sponsors will have spent nothing and no receipts are needed.
        </p>
-       <a href ="#Sponsorize">
-       <Checkbox
-          className={`${styles.checkbox} `}
-          label='I have read and understood!'
-          onChange={this.setChecked}
-        />
-        </a>
+        <div>
+          <h3 className="text-center text-trips-1">Preview</h3>
+          <div className={`${styles.centerCard}`}>
+            {this.state.element.header.length > 0
+              ? <Card >
+              <Image src={this.state.element.image} wrapped ui={false} />
+                <Card.Content>
+                  <Card.Header>{this.state.element.header}</Card.Header>
+                  </Card.Content>
+              </Card>
+              :<span></span>
+            }
+        </div>
+        <p >
+        <a href ="#Sponsorize">
+        <Checkbox
+           className={`${styles.checkbox} `}
+           label='I have read and understood!'
+           onChange={this.setChecked}
+         />
+         </a>
+         </p>
+      </div>
     </div>
-    <h2 id="Sponsorize" className="text-center">Become the Sponsor</h2>
+    <h2 id="Sponsorize" className="text-center">Become the new Sponsor</h2>
         <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
               <Form.Field>
+              <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} xDAI</h3>
+              {this.state.currentSponsor != 0
+                ? <h4 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} xDAI)</h4>
+                : <div></div>
+              }
               <Input
+                  className = {`${styles.padding}`}
                   error = {true}
-                  placeholder='[Insert your company name or your sponsor sentence. Max 35 length]'
+                  placeholder='[Insert your company name or your sponsor sentence. Max 32 length]'
                   onChange={this.handleChange}
-                  maxLength="35"
+                  maxLength="32"
                   value = {this.state.sponsorQuote}
                   disabled = {!this.state.understood}
               />
@@ -205,25 +210,13 @@ render(){
                 <Message warning header="Pending user confirmation..." content = {this.state.warningMessage} />
                 <Message success header="Success!" content = {this.state.successMessage} />
               </Form.Field>
-                  <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} xDAI</h3>
-                  {this.state.currentSponsor != 0
-                    ? <h4 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} xDAI)</h4>
-                    : <div></div>
-                  }
-
-
-              <div className={`${styles.buttons__component}`}>
+              <div className="text-center">
+                By clicking the button below you are offering {this.state.sponsorPrice} xDAI for the sponsorship
                 <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 35 || !this.state.understood}>
                   {this.state.buttonLabel}
                 </button>
-                <button  className={`btn btn__alternative`} onClick = {this.fetchNFTList} disabled={this.state.loading > 0 || !this.state.understood} >Example</button>
-
               </div>
             </Form>
-
-            <div style={{padding:"15px"}}>
-              <Card.Group itemsPerRow={3} stackable={true} doubling={true} centered items={this.state.all} />
-            </div>
     </Container>
   )
 };
