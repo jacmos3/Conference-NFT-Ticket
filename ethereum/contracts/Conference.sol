@@ -1397,7 +1397,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         require(tx.origin == _sender, ERR_NO_HACKS_PLS);
         require(msg.value == sponsorshipPrice, ERR_INSERT_EXACT);
         uint256 len = bytes(_quote).length;
-        require(len > 0 && len <= 35, ERR_TOO_MANY_CHARS);
+        require(len > 0 && len <= 32, ERR_TOO_MANY_CHARS);
         require(sanitize(_quote), ERR_INPUT_NOT_VALID);
         details[DET_SPONSOR_QUOTE] = _quote;
         details[DET_SPONSOR_QUOTE_LONG] = string(abi.encodePacked(SPONSOR, _quote));
@@ -1534,7 +1534,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     function sanitize(string memory input) internal pure returns(bool){
         uint8 allowedChars = 0;
         bytes memory byteString = bytes(input);
-        bytes memory allowed = bytes("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ ");
+        bytes memory allowed = bytes("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ .,:;()[]{}+-*$!?");
         bool exit = false;
         for(uint8 i=0; i < byteString.length; i++){
           exit = false;
