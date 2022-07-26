@@ -1287,11 +1287,10 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
 contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     bool public paused;
     uint16 public constant MAX_ID = 500;
-    uint256 public constant INITIAL_PRICE  = 25 wei;
-    uint256 public constant END_PRICE = 75 wei;
-    uint256 public constant INITIAL_SPONSOR_PRICE = 500 wei;
-    //uint256 private constant EXP = 10**18;
-    uint256 private constant EXP = 1; //for testing
+    uint256 public constant INITIAL_PRICE  = 25 ether;
+    uint256 public constant END_PRICE = 75 ether;
+    uint256 public constant INITIAL_SPONSOR_PRICE = 500 ether;
+    uint256 private constant EXP = 10**18;
     uint256 private sumIncrement = 0;
     uint256 private dateTime;
     uint256 public price;
