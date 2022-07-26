@@ -38,7 +38,7 @@ class ClaimingForm extends Component{
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
-            this.setState({buttonLabel:"Minting paused",loading: this.state.loading +1,errorMessage:"The NFT minting has been paused. Come back later!"});
+            this.setState({price,buttonLabel:"Minting paused",loading: this.state.loading +1,errorMessage:"The NFT minting has been paused. Come back later!"});
             return false;
           }
 

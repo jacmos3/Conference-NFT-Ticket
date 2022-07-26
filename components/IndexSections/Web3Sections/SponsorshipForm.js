@@ -39,7 +39,7 @@ class SponsorshipForm extends Component{
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
-            this.setState({buttonLabel:"Paused",loading: this.state.loading + 1, errorMessage:"The sponsorship program has been paused. Come back later!"});
+            this.setState({sponsorPrice,currentSponsor,buttonLabel:"Paused",loading: this.state.loading + 1, errorMessage:"The sponsorship program has been paused. Come back later!"});
             return false;
           }
 
