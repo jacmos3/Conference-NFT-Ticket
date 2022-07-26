@@ -33,14 +33,6 @@ class MyDapp extends Component {
 
             chains: [
                 {
-                  name:process.env.NEXT_PUBLIC_RINKEBY_NAME,
-                  id:parseInt(process.env.NEXT_PUBLIC_RINKEBY_ID),
-                  addr:process.env.NEXT_PUBLIC_RINKEBY_CONTRACT_ADDRESS,
-                  marketplace:"https://testnets.opensea.io/collection/web3-in-travel-nft-ticket-tbv0qt7nou",
-                  openseaCard:"https://testnets.opensea.io/assets/",
-                  coin:"ETH"
-                },
-                {
                   name:process.env.NEXT_PUBLIC_KILN_NAME,
                   id:parseInt(process.env.NEXT_PUBLIC_KILN_ID),
                   addr:process.env.NEXT_PUBLIC_KILN_CONTRACT_ADDRESS,
