@@ -34,7 +34,7 @@ class ClaimingForm extends Component{
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress);
-          console.log("retrieving ticket price");
+          let price = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call()));
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
@@ -44,7 +44,6 @@ class ClaimingForm extends Component{
 
           let totalSupply = parseInt(await instance.methods.totalSupply().call());
           let maxSupply = parseInt(await instance.methods.MAX_ID().call());
-          let price = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call()));
 
           if (totalSupply >= maxSupply){
             console.log("minting finished");
