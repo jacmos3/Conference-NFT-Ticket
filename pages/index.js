@@ -33,28 +33,35 @@ class MyDapp extends Component {
 
             chains: [
                 {
-                  name:"Rinkeby", id:4,
+                  name:process.env.NEXT_PUBLIC_RINKEBY_NAME,
+                  id:parseInt(process.env.NEXT_PUBLIC_RINKEBY_ID),
+                  addr:process.env.NEXT_PUBLIC_RINKEBY_CONTRACT_ADDRESS,
                   marketplace:"https://testnets.opensea.io/collection/web3-in-travel-nft-ticket-tbv0qt7nou",
                   openseaCard:"https://testnets.opensea.io/assets/",
-                  options:{
-                    coin:{
-                      name:"xDAI"
-                    }
-                  }
+                  coin:"ETH"
+                },
+                {
+                  name:process.env.NEXT_PUBLIC_KILN_NAME,
+                  id:parseInt(process.env.NEXT_PUBLIC_KILN_ID),
+                  addr:process.env.NEXT_PUBLIC_KILN_CONTRACT_ADDRESS,
+                  marketplace:"#",
+                  openseaCard:"#",
+                  coin:"ETH"
+                },
+                {
+                  name:process.env.NEXT_PUBLIC_GNOSIS_NAME,
+                  id:parseInt(process.env.NEXT_PUBLIC_GNOSIS_ID),
+                  addr:process.env.NEXT_PUBLIC_GNOSIS_CONTRACT_ADDRESS,
+                  marketplace:"#",
+                  openseaCard:"#",
+                  coin:"xDAI"
                 }
-
           ],
         }
     };
 
     constructor(props) {
         super(props);
-    }
-
-    async componentDidMount() {
-        var web3Settings = this.state.web3Settings;
-        web3Settings.contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-        this.setState({web3Settings: web3Settings});
     }
 
     update = async (nextState) => {
@@ -125,11 +132,16 @@ class MyDapp extends Component {
         })
 
         provider.on("disconnect", function () {
-                console.log("disconnecting");
-                provider.disconnect();
-                web3Modal.clearCachedProvider();
-                provider = null;
+            console.log("disconnecting");
+            try{
+              provider.disconnect();
+              web3Modal.clearCachedProvider();
+              provider = null;
             }
+            catch(err){
+              console.log(err);
+            }
+        }
         );
 
         this.setState({web3: web3});

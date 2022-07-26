@@ -21,13 +21,10 @@ class ClaimingForm extends Component{
   }
 
   componentDidMount(){
-    var coin = this.props.state.web3Settings.chains
-      .filter(chain => chain.id === this.props.state.web3Settings.networkId)
-      .map(chain => chain.options.coin)[0];
-    console.log("filter done");
-    console.log(coin);
-    this.setState({coin:coin});
-
+    var myChain = this.props.state.web3Settings.chains
+      .filter(chain => chain.id === this.props.state.web3Settings.networkId);
+    //var coin = myChain.map(chain => chain.options.coin)[0];
+    this.setState({coin:myChain[0].coin, contractAddress:myChain[0].addr});
     this.fetchInitialInfo(true);
   }
 
@@ -36,18 +33,18 @@ class ClaimingForm extends Component{
       this.setState({loading: this.state.loading +1, errorMessage: '',successMessage:''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
-          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress);
+          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress);
           console.log("retrieving ticket price");
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
-            this.setState({buttonLabel:"Minting paused",loading: this.state.loading +1});
+            this.setState({buttonLabel:"Minting paused",loading: this.state.loading +1,errorMessage:"The NFT minting has been paused. Come back later!"});
             return false;
           }
 
           let totalSupply = parseInt(await instance.methods.totalSupply().call());
           let maxSupply = parseInt(await instance.methods.MAX_ID().call());
-          let price = parseInt(await instance.methods.price().call());
+          let price = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call()));
 
           if (totalSupply >= maxSupply){
             console.log("minting finished");
@@ -81,11 +78,8 @@ class ClaimingForm extends Component{
     this.setState({loading:this.state.loading+1, errorMessage:'',warningMessage: "Confirm the transaction on your wallet and then wait for confirmation...",successMessage:''})
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
-      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress );
-      //console.log(this.props.state.web3.utils.fromWei(this.state.checked ? this.state.price.toString() : Math.trunc(this.state.price *1.2).toString()));
-      //await instance.methods.claimByPatrons(this.state.checked).send({from:accounts[0], value:(this.props.state.web3.utils.fromWei(this.state.checked ? this.state.price.toString() : Math.trunc(this.state.price *1.2).toString()))});
-      console.log(!this.state.checked ? Math.trunc(this.state.price *1.2).toString() : this.state.price.toString() );
-      await instance.methods.claimByPatrons(!this.state.checked).send({from:accounts[0], value:(!this.state.checked ? Math.trunc(this.state.price *1.2).toString() : this.state.price.toString())});
+      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress );
+      await instance.methods.claimByPatrons(!this.state.checked).send({from:accounts[0], value:(this.props.state.web3.utils.toWei(!this.state.checked ? Math.trunc(this.state.price *1.2).toString() : this.state.price.toString(),"ether"))});
       this.fetchNFTList();
       this.fetchInitialInfo(false);
       this.setState({successMessage:"Minting successfull! check your ticket below:", errorMessage: ""});
@@ -105,7 +99,7 @@ class ClaimingForm extends Component{
       this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage:'',successMessage:''})
       try{
         const accounts= await this.props.state.web3.eth.getAccounts();
-        const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress );
+        const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress );
         let lastUserIndex = await instance.methods.balanceOf(accounts[0]).call()
         .then((result) =>{
             return JSON.parse(result);
@@ -153,12 +147,6 @@ class ClaimingForm extends Component{
     this.setState({checked:!checked});
   }
 
-  onChange(event){
-    event.preventDefault();
-    console.log(event.target.value * this.state.coin.amount);
-    this.setState({howManyLT: event.target.value});
-  }
-
   render(){
     return (
       <Container>
@@ -169,7 +157,7 @@ class ClaimingForm extends Component{
                 <h3>Next ticket cost:</h3>
                 <div className={`${styles.marginBottom}`} >The price increases following a <a className={`a__underline__primary`} href={this.props.state.web3Settings.lnk_bondingCurve}>bonding curve</a>.</div>
                 <Input
-                  label={{ basic: true, content: this.state.coin.name, id:"inputLabel" }}
+                  label={{ basic: true, content: this.state.coin, id:"inputLabel" }}
                   labelPosition='right'
                   placeholder='Ether amount'
                   readOnly

@@ -21,10 +21,10 @@ class SponsorshipForm extends Component{
   }
 
   componentDidMount(){
-    var coin = this.props.state.web3Settings.chains
-      .filter(chain => chain.id === this.props.state.web3Settings.networkId)
-      .map(chain => chain.options.coin)[0];
-    this.setState({coin:coin});
+    var myChain = this.props.state.web3Settings.chains
+      .filter(chain => chain.id === this.props.state.web3Settings.networkId);
+
+    this.setState({coin:myChain[0].coin, contractAddress:myChain[0].addr});
     this.fetchInitialInfo();
   }
 
@@ -33,20 +33,19 @@ class SponsorshipForm extends Component{
       this.setState({loading: this.state.loading + 1, errorMessage: ''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
-          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress);
+          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress);
           console.log("retrieving ticket price");
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
-            this.setState({buttonLabel:"Paused",loading: this.state.loading + 1});
+            this.setState({buttonLabel:"Paused",loading: this.state.loading + 1, errorMessage:"The sponsorship program has been paused. Come back later!"});
             return false;
           }
 
           let totalSupply = parseInt(await instance.methods.totalSupply().call());
           let maxSupply = parseInt(await instance.methods.MAX_ID().call());
-          let sponsorPrice = parseInt(await instance.methods.sponsorshipPrice().call());
-          let currentSponsor = parseInt(await instance.methods.sponsorPayment().call())
-
+          let sponsorPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.sponsorshipPrice().call()));
+          let currentSponsor = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.sponsorPayment().call()));
           let uri = await instance.methods.tokenURI(0).call()
           .then((result)=> {
             return JSON.parse(window.atob(result.split(',')[1]));
@@ -83,11 +82,8 @@ class SponsorshipForm extends Component{
     this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage: "Confirm the transaction on your wallet and then wait for confirmation...", successMessage:""})
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
-      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.props.state.web3Settings.contractAddress );
-      //console.log(this.props.state.web3.utils.fromWei(this.state.checked ? this.state.price.toString() : Math.trunc(this.state.price *1.2).toString()));
-      //await instance.methods.claimByPatrons(this.state.checked).send({from:accounts[0], value:(this.props.state.web3.utils.fromWei(this.state.checked ? this.state.price.toString() : Math.trunc(this.state.price *1.2).toString()))});
-      console.log("quote:" + this.state.sponsorQuote.toString() );
-      await instance.methods.sponsorship(this.state.sponsorQuote.toString()).send({from:accounts[0], value:this.state.sponsorPrice.toString()});
+      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress );
+      await instance.methods.sponsorship(this.state.sponsorQuote.toString()).send({from:accounts[0], value:this.props.state.web3.utils.toWei(this.state.sponsorPrice.toString(),"ether")});
       this.setState({successMessage:"Sponsorizing successfull! Your quote is now in all the conference NFT tickets!"});
     }
     catch(err){
@@ -177,7 +173,7 @@ render(){
               :<span></span>
             }
         </div>
-        <p >
+
         <a href ="#Sponsorize">
         <Checkbox
            className={`${styles.checkbox} `}
@@ -185,15 +181,15 @@ render(){
            onChange={this.setChecked}
          />
          </a>
-         </p>
+
       </div>
     </div>
     <h2 id="Sponsorize" className="text-center">Become the new Sponsor</h2>
         <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
               <Form.Field>
-              <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} xDAI</h3>
+              <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} {this.state.coin}</h3>
               {this.state.currentSponsor != 0
-                ? <h4 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} xDAI)</h4>
+                ? <h4 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} {this.state.coin})</h4>
                 : <div></div>
               }
               <Input
@@ -212,7 +208,7 @@ render(){
                 <Message success header="Success!" content = {this.state.successMessage} />
               </Form.Field>
               <div className="text-center">
-                By clicking the button below you are offering {this.state.sponsorPrice} xDAI for the sponsorship
+                By clicking the button below you are offering {this.state.sponsorPrice} {this.state.coin} for the sponsorship
                 <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 35 || !this.state.understood}>
                   {this.state.buttonLabel}
                 </button>

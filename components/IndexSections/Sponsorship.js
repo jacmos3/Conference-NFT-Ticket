@@ -4,41 +4,12 @@ import styles from "../../styles/components/Sponsorship.module.scss"; // Styles
 import SponsorshipForm from "./Web3Sections/SponsorshipForm"
 
 
-class Claim extends Component {
-    state = {
-        loading: 0,
-        all: [],
-        activeIndex: 0
-    }
-
+class Sponsorship extends Component {
     constructor(props) {
         super(props);
-        this.goToFetch = this.goToFetch.bind(this);
-    }
-
-    handleTabChange = (e, {activeIndex}) => this.setState({activeIndex});
-
-    goToFetch() {
-      this.setState({activeIndex:0});
     }
 
     render() {
-        var option = this.props.state.web3Settings.chains
-            .filter(chain => chain.id === this.props.state.web3Settings.networkId)
-            .map(chain => chain.options)[0];
-
-        const panes = [
-          {
-              menuItem: "Yours",
-              render: () => <FetchNFTList state={this.props.state}/>
-          },
-            option && option.coin ?
-                {
-                    menuItem: 'Mint With ' + option.coin.name,
-                    render: () => <ClaimWithEther state={this.props.state} goToFetch={this.goToFetch}/>,
-                } : null,
-
-        ]
         return (
             <div className={`${styles.claim__container} py-10 text-trips-1`}>
                 <div className="flex justify-around">
@@ -48,11 +19,11 @@ class Claim extends Component {
                             this.props.state.web3Settings.isWeb3Connected
                                 ? this.props.state.web3Settings.chains
                                     .filter(chain => chain.id === this.props.state.web3Settings.networkId)
-                                    .map(chain => chain.options.id).length == 1
+                                    .length == 1
                                 ?
                                 (
                                     <div>
-                                        <SponsorshipForm state={this.props.state} goToFetch={this.goToFetch}/>
+                                        <SponsorshipForm state={this.props.state} />
                                     </div>
                                 )
                                 : (
@@ -112,4 +83,4 @@ class Claim extends Component {
     };
 }
 
-export default Claim;
+export default Sponsorship;
