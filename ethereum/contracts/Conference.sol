@@ -1356,7 +1356,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         sponsorshipPrice = INITIAL_SPONSOR_PRICE;
         price = INITIAL_PRICE;
         treasurer = 0xce73904422880604e78591fD6c758B0D5106dD50; //TripsCommunity address
-        paused = false;
+        paused = true;
         dateTime = 1664582399; //30 september 23.59.59 UTC
     }
 
