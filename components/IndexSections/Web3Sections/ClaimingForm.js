@@ -78,7 +78,7 @@ class ClaimingForm extends Component{
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
       const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress );
-      await instance.methods.claimByPatrons(!this.state.checked).send({from:accounts[0], value:(this.props.state.web3.utils.toWei(!this.state.checked ? Math.trunc(this.state.price *1.2).toString() : this.state.price.toString(),"ether"))});
+      await instance.methods.claimByPatrons(!this.state.checked).send({from:accounts[0], value:(this.props.state.web3.utils.toWei(!this.state.checked ? (this.state.price * this.state.multiplier).toFixed(2).toString() : this.state.price.toString(),"ether"))});
       this.fetchNFTList();
       this.fetchInitialInfo(false);
       this.setState({successMessage:"Minting successfull! check your ticket below:", errorMessage: ""});
@@ -160,7 +160,7 @@ class ClaimingForm extends Component{
                   labelPosition='right'
                   placeholder='Ether amount'
                   readOnly
-                  value = {this.state.checked ? this.state.price : Math.trunc(this.state.price * this.state.multiplier)}
+                  value = {this.state.checked ? this.state.price.toFixed(2) : (this.state.price * this.state.multiplier).toFixed(2)}
                 />
                 </Form.Field>
                 <Form.Field className={`${styles.content}`} >
