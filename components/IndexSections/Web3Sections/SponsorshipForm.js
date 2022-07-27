@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Form,Field,Input,Message,Button,Container,Checkbox,Card,Image} from 'semantic-ui-react';
+import {Form,Field,Input,Message,Button,Container,Checkbox,Card,Image, Icon} from 'semantic-ui-react';
 import Conference from '../../../ethereum/build/Conference.sol.json';
 import styles from "../../../styles/components/Web3Sections/SponsorshipForm.module.scss";
 import Ticket from '../../../public/img/Ticket.svg'
@@ -204,11 +204,17 @@ render(){
               </Form.Field>
               <Form.Field>
                 <Message error header="Oops!" content = {this.state.errorMessage} />
-                <Message warning header="Pending user confirmation..." content = {this.state.warningMessage} />
+                <Message warning icon >
+                  <Message.Content>
+                    <Message.Header>Pending user confirmation...</Message.Header>
+                    {this.state.warningMessage}
+                  </Message.Content>
+                  <Icon name='circle notched' loading />
+                </Message>
                 <Message success header="Success!" content = {this.state.successMessage} />
               </Form.Field>
               <div className="text-center">
-                By clicking the button below you are offering {this.state.sponsorPrice} {this.state.coin} for the sponsorship
+                By clicking the button below you are paying {this.state.sponsorPrice} {this.state.coin} for the sponsorship
                 <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 35 || !this.state.understood}>
                   {this.state.buttonLabel}
                 </button>
