@@ -32,21 +32,29 @@ class MyDapp extends Component {
             lnk_spnsr_read_more:"#5",
 
             chains: [
+                // {
+                //   name:process.env.NEXT_PUBLIC_RINKEBY_NAME,
+                //   id:parseInt(process.env.NEXT_PUBLIC_RINKEBY_ID),
+                //   addr:process.env.NEXT_PUBLIC_RINKEBY_CONTRACT_ADDRESS,
+                //   marketplace:process.env.NEXT_PUBLIC_RINKEBY_MARKETPLACE,
+                //   openseaCard:process.env.NEXT_PUBLIC_RINKEBY_OPENSEACARD,
+                //   coin:process.env.NEXT_PUBLIC_RINKEBY_COIN
+                // },
                 {
                   name:process.env.NEXT_PUBLIC_KILN_NAME,
                   id:parseInt(process.env.NEXT_PUBLIC_KILN_ID),
                   addr:process.env.NEXT_PUBLIC_KILN_CONTRACT_ADDRESS,
-                  marketplace:"#",
-                  openseaCard:"#",
-                  coin:"ETH"
+                  marketplace:process.env.NEXT_PUBLIC_KILN_MARKETPLACE,
+                  openseaCard:process.env.NEXT_PUBLIC_KILN_OPENSEACARD,
+                  coin:process.env.NEXT_PUBLIC_KILN_COIN
                 },
                 {
                   name:process.env.NEXT_PUBLIC_GNOSIS_NAME,
                   id:parseInt(process.env.NEXT_PUBLIC_GNOSIS_ID),
                   addr:process.env.NEXT_PUBLIC_GNOSIS_CONTRACT_ADDRESS,
-                  marketplace:"#",
-                  openseaCard:"#",
-                  coin:"xDAI"
+                  marketplace:process.env.NEXT_PUBLIC_GNOSIS_MARKETPLACE,
+                  openseaCard:process.env.NEXT_PUBLIC_GNOSIS_OPENSEACARD,
+                  coin:process.env.NEXT_PUBLIC_GNOSIS_COIN
                 }
           ],
         }
