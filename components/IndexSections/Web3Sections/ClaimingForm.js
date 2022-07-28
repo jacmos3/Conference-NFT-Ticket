@@ -10,7 +10,7 @@ class ClaimingForm extends Component{
     warningMessage:"",
     successMessage:"",
     coin:"",
-    price:0,
+    adjustedPrice:0.00,
     checked:true,
     buttonLabel: "Mint",
     all:[],
@@ -30,22 +30,22 @@ class ClaimingForm extends Component{
 
   async fetchInitialInfo(firstFetch) {
       console.log("start initial Info");
-      this.setState({loading: this.state.loading +1, errorMessage: '',successMessage:''});
+      this.setState({checked:false,loading: this.state.loading +1, errorMessage: '',successMessage:''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress);
-          let price = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call()));
+          let adjustedPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call())).toFixed(2);
 
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
-            this.setState({price,buttonLabel:"Minting paused",loading: this.state.loading +1,errorMessage:"The NFT minting has been paused. Come back later!"});
+            this.setState({adjustedPrice,buttonLabel:"Minting paused",loading: this.state.loading +1,errorMessage:"The NFT minting has been paused. Come back later!"});
             return false;
           }
 
-          if (price > this.props.state.web3Settings.ethBalance){
+          if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
-            this.setState({price,loading: this.state.loading +1,errorMessage:`Minting a ticket requires ${price} $${this.state.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.coin} right now. You need to refill your wallet with more $${this.state.coin}`});
+            this.setState({adjustedPrice,loading: this.state.loading +1,errorMessage:`Minting a ticket requires ${adjustedPrice} $${this.state.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.coin} right now. You need to refill your wallet with more $${this.state.coin}`});
             return false;
           }
 
@@ -59,12 +59,12 @@ class ClaimingForm extends Component{
           }
 
           //console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + price + " " + paused);
-          this.setState({loading: this.state.loading -1, errorMessage: "",totalSupply,maxSupply,price});
+          this.setState({totalSupply,maxSupply,adjustedPrice,loading: this.state.loading -1, errorMessage: ""});
           console.log("end try Info - success");
           if (firstFetch){
             this.fetchNFTList();
           }
-          return price;
+          return adjustedPrice;
       } catch (err) {
         console.log(err);
           this.setState({loading: this.state.loading -1, errorMessage: err.message});
@@ -85,16 +85,19 @@ class ClaimingForm extends Component{
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
       const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress );
-      await instance.methods.claimByPatrons(!this.state.checked).send({from:accounts[0], value:(this.props.state.web3.utils.toWei(!this.state.checked ? (this.state.price * this.state.multiplier).toFixed(2).toString() : this.state.price.toString(),"ether"))});
+      await instance.methods.claimByPatrons(!this.state.checked)
+        .send({
+          from:accounts[0],
+          value:(this.props.state.web3.utils.toWei(this.state.adjustedPrice.toString(),"ether"))
+        });
       this.fetchNFTList();
-      this.fetchInitialInfo(false);
       this.setState({successMessage:"Minting successfull! check your ticket below:", errorMessage: ""});
     }
     catch(err){
       this.setState({errorMessage: err.message,warningMessage: ""});
-      this.fetchInitialInfo(false);
-    }
 
+    }
+    this.fetchInitialInfo(false);
 
     this.setState({loading:this.state.loading-1,warningMessage: ""});
     console.log("end mint");
@@ -151,8 +154,17 @@ class ClaimingForm extends Component{
     }
 
   handleClick = (e, { checked }) => {
-    //console.log("cheked: " + checked);
-    this.setState({checked:!checked});
+    console.log("cheked: " + checked);
+    var adjustedPrice = checked ? (this.state.adjustedPrice * this.state.multiplier).toFixed(2) : (this.state.adjustedPrice / this.state.multiplier).toFixed(2);
+    var errorMessage = "";
+    if (adjustedPrice > this.props.state.web3Settings.ethBalance){
+      console.log("You do not have enough money");
+      errorMessage = `Minting a ticket requires ${adjustedPrice} $${this.state.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.coin} right now. You need to refill your wallet with more $${this.state.coin}`;
+    }
+    else{
+      errorMessage:"";
+    }
+    this.setState({errorMessage,adjustedPrice,checked});
   }
 
   render(){
@@ -169,7 +181,7 @@ class ClaimingForm extends Component{
                   labelPosition='right'
                   placeholder='Ether amount'
                   readOnly
-                  value = {this.state.checked ? this.state.price.toFixed(2) : (this.state.price * this.state.multiplier).toFixed(2)}
+                  value = {this.state.adjustedPrice}
                 />
                 </Form.Field>
                 <Form.Field className={`${styles.content}`} >
@@ -179,6 +191,7 @@ class ClaimingForm extends Component{
                   <Checkbox
                     toggle
                     onClick={this.handleClick}
+                    checked={this.state.checked}
                   />
                 </Form.Field>
                 <Form.Field>
