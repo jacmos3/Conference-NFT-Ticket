@@ -20,6 +20,8 @@ class MyDapp extends Component {
         website: process.env.NEXT_PUBLIC_GEN_WEBSITE,
         discord: process.env.NEXT_PUBLIC_GEN_DISCORD,
         tripsCommunity: process.env.NEXT_PUBLIC_GEN_TRIPSCOMMUNITY,
+        github: process.env.NEXT_PUBLIC_GEN_GITHUB,
+        policy: process.env.NEXT_PUBLIC_GEN_POLICY,
         lnk_bondingCurve:process.env.NEXT_PUBLIC_GEN_LNK_BONDING_CURVE,
         lnk_airdrop:process.env.NEXT_PUBLIC_GEN_LNK_AIRDROP,
         lnk_how_to_access:process.env.NEXT_PUBLIC_GEN_LNK_HOW_TO_ACCESS,

@@ -16,22 +16,24 @@ class Footer extends Component {
                     <a target="_blank" href={this.props.state.tripsCommunity} className={`${styles__footer.link} a__link__secondary`}>
                         <span>TripsCommunity DAO</span>
                     </a>
-
                     On
-
                     <div className={`${styles__footer.img}`} >
-                    <a href="https://gnosischain.com"><img src="../img/gnosischain.png" alt="Gnosis chain" /></a>
-
+                      <a href="https://gnosischain.com"><img src="../img/gnosischain.png" alt="Gnosis chain" /></a>
                     </div>
-
-                    <br/>
-                    <br/>
+                    <br />
+                    <div>
                     Website and Smart Contract's code are
-                        <a target="_blank" rel="noopener noreferrer" href="https://github.com/jacmos3/Conference-NFT-Ticket" className={`${styles__footer.link} a__link__secondary`}>
-                            <span>open-source</span>
+                        <a target="_blank" rel="noopener noreferrer" href={this.props.state.github} className={`${styles__footer.link} a__link__secondary`}>
+                            open-source
                         </a>
                     and licensed under MIT license.
-                    <br/>
+                    </div>
+                    <br />
+                    <div>
+                    <a target="_blank" rel="noopener noreferrer" href={this.props.state.policy} className={`${styles__footer.link} a__link__secondary`}>
+                        Privacy policy
+                    </a>
+                    </div>
                 </div>
             </div>
         );
