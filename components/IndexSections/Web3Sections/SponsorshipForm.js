@@ -144,7 +144,7 @@ render(){
         <br />resulting as a temporary free advertisement!
       </p>
       <p className="text-indigo-800">
-        <a className={`a__underline__primary`} href={this.props.state.web3Settings.lnk_spnsr_read_more}> Read more... </a>
+        <a className={`a__underline__primary`} href={this.props.state.lnk_spnsr_read_more}> Read more... </a>
       </p>
     <br />
      <h3 className="text-center text-trips-1">Invoice</h3>

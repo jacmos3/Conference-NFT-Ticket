@@ -16,20 +16,19 @@ import styles from "../styles/pages/INDEX.module.scss";
 
 class MyDapp extends Component {
     state = {
-        marketplace: "https://testnets.opensea.io/collection/web3-in-travel-nft-ticket-tbv0qt7nou",
-        etherscan: "https://etherscan.io/",
-        twitter: "https://twitter.com/tripscommunity",
-        website: "https://web3intravel.com/",
-        discord: "https://discord.gg/ABEnBKanhA",
-        tripsCommunity: "https://www.tripscommunity.com",
+        twitter: process.env.NEXT_PUBLIC_GEN_TWITTER,
+        website: process.env.NEXT_PUBLIC_GEN_WEBSITE,
+        discord: process.env.NEXT_PUBLIC_GEN_DISCORD,
+        tripsCommunity: process.env.NEXT_PUBLIC_GEN_TRIPSCOMMUNITY,
+        lnk_bondingCurve:process.env.NEXT_PUBLIC_GEN_LNK_BONDING_CURVE,
+        lnk_airdrop:process.env.NEXT_PUBLIC_GEN_LNK_AIRDROP,
+        lnk_how_to_access:process.env.NEXT_PUBLIC_GEN_LNK_HOW_TO_ACCESS,
+        lnk_marketplace:process.env.NEXT_PUBLIC_GEN_LNK_MARKETPLACE,
+        lnk_spnsr_read_more:process.env.NEXT_PUBLIC_GEN_LNK_SPONSOR_READ_MORE,
+
         web3Settings: {
-            infura: "aec28327c8c04ea7b712b34da8302791",//ldg
+            infura: process.env.NEXT_PUBLIC_WEB3SETTINGS_INFURA,
             isWeb3Connected: false,
-            lnk_bondingCurve:"#1",
-            lnk_airdrop:"#2",
-            lnk_how_to_access:"#3",
-            lnk_marketplace:"#4",
-            lnk_spnsr_read_more:"#5",
 
             chains: [
                 // {
