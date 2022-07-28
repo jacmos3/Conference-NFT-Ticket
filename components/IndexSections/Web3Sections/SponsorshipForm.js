@@ -43,6 +43,12 @@ class SponsorshipForm extends Component{
             return false;
           }
 
+          if (sponsorPrice > this.props.state.web3Settings.ethBalance){
+            console.log("You do not have enough money");
+            this.setState({sponsorPrice,currentSponsor,loading: this.state.loading +1,errorMessage:`Becoming the new sponsor requires ${sponsorPrice} $${this.state.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.coin} right now. You need to refill your wallet with more $${this.state.coin}`});
+            return false;
+          }
+
           let totalSupply = parseInt(await instance.methods.totalSupply().call());
           let maxSupply = parseInt(await instance.methods.MAX_ID().call());
 

@@ -35,10 +35,17 @@ class ClaimingForm extends Component{
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress);
           let price = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call()));
+
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
             this.setState({price,buttonLabel:"Minting paused",loading: this.state.loading +1,errorMessage:"The NFT minting has been paused. Come back later!"});
+            return false;
+          }
+
+          if (price > this.props.state.web3Settings.ethBalance){
+            console.log("You do not have enough money");
+            this.setState({price,loading: this.state.loading +1,errorMessage:`Minting a ticket requires ${price} $${this.state.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.coin} right now. You need to refill your wallet with more $${this.state.coin}`});
             return false;
           }
 
@@ -126,9 +133,11 @@ class ClaimingForm extends Component{
           });
 
           let element = {
+            "key": uri.name,
             "header": <div className="text-center">{uri.name}</div>,
             "image":uri.image,
-            "extra":<div className="text-center"><a href={this.props.state.lnk_marketplace}>Trade on secondary market</a></div>};
+            "extra":<div className="text-center"><a href={this.props.state.lnk_marketplace}>Trade on secondary market</a></div>,
+          };
           all.push(element);
           //console.log(uri);
           this.setState({all:all});
