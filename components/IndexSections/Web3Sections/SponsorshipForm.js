@@ -24,7 +24,7 @@ class SponsorshipForm extends Component{
     var myChain = this.props.state.web3Settings.chains
       .filter(chain => chain.id === this.props.state.web3Settings.networkId);
     this.setState({chain:myChain[0]});
-    //this.fetchInitialInfo();
+    this.fetchInitialInfo();
   }
 
   async fetchInitialInfo() {
