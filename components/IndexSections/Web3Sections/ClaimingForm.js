@@ -154,6 +154,9 @@ class ClaimingForm extends Component{
     }
 
   handleClick = (e, { checked }) => {
+    if (this.state.loading > 0){
+      return;
+    }
     console.log("cheked: " + checked);
     var adjustedPrice = checked ? (this.state.adjustedPrice * this.state.multiplier).toFixed(2) : (this.state.adjustedPrice / this.state.multiplier).toFixed(2);
     var errorMessage = "";
@@ -192,6 +195,7 @@ class ClaimingForm extends Component{
                     toggle
                     onClick={this.handleClick}
                     checked={this.state.checked}
+                    disabled ={this.state.loading > 0}
                   />
                 </Form.Field>
                 <Form.Field>
