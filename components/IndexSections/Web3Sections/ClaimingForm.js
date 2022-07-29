@@ -9,7 +9,7 @@ class ClaimingForm extends Component{
     errorMessage:"",
     warningMessage:"",
     successMessage:"",
-    coin:"",
+    chain:{},
     adjustedPrice:0.00,
     checked:true,
     buttonLabel: "Mint",
@@ -24,7 +24,7 @@ class ClaimingForm extends Component{
     var myChain = this.props.state.web3Settings.chains
       .filter(chain => chain.id === this.props.state.web3Settings.networkId);
     //var coin = myChain.map(chain => chain.options.coin)[0];
-    this.setState({coin:myChain[0].coin, contractAddress:myChain[0].addr});
+    this.setState({chain:myChain[0]});
     this.fetchInitialInfo(true);
   }
 
@@ -33,7 +33,7 @@ class ClaimingForm extends Component{
       this.setState({checked:false,loading: this.state.loading +1, errorMessage: '',successMessage:''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
-          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress);
+          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr);
           let adjustedPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call())).toFixed(2);
 
           let paused = await instance.methods.paused().call();
@@ -45,7 +45,7 @@ class ClaimingForm extends Component{
 
           if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
-            this.setState({adjustedPrice,loading: this.state.loading +1,errorMessage:`Minting a ticket requires ${adjustedPrice} $${this.state.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.coin} right now. You need to refill your wallet with more $${this.state.coin}`});
+            this.setState({adjustedPrice,loading: this.state.loading +1,errorMessage:`Minting a ticket requires ${adjustedPrice} $${this.state.chain.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now. You need to refill your wallet with more $${this.state.chain.coin}`});
             return false;
           }
 
@@ -84,8 +84,8 @@ class ClaimingForm extends Component{
     this.setState({loading:this.state.loading+1, errorMessage:'',warningMessage: "Confirm the transaction on your wallet and then wait for confirmation...",successMessage:''})
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
-      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress );
-      await instance.methods.claimByPatrons(!this.state.checked)
+      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr );
+      await instance.methods.claimByPatrons(this.state.checked)
         .send({
           from:accounts[0],
           value:(this.props.state.web3.utils.toWei(this.state.adjustedPrice.toString(),"ether"))
@@ -108,7 +108,7 @@ class ClaimingForm extends Component{
       this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage:'',successMessage:''})
       try{
         const accounts= await this.props.state.web3.eth.getAccounts();
-        const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress );
+        const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr );
         let lastUserIndex = await instance.methods.balanceOf(accounts[0]).call()
         .then((result) =>{
             return JSON.parse(result);
@@ -139,7 +139,7 @@ class ClaimingForm extends Component{
             "key": uri.name,
             "header": <div className="text-center">{uri.name}</div>,
             "image":uri.image,
-            "extra":<div className="text-center"><a href={this.props.state.lnk_marketplace}>Trade on secondary market</a></div>,
+            "extra":<div className="text-center"><a target="_blank" href={this.state.chain.marketCard.replace("[PH_ADDR]",this.state.chain.addr).replace("[PH_ID]",uri.name.replace("Ticket #",""))}>Trade on secondary market</a></div>,
           };
           all.push(element);
           //console.log(uri);
@@ -159,7 +159,7 @@ class ClaimingForm extends Component{
     var errorMessage = "";
     if (adjustedPrice > this.props.state.web3Settings.ethBalance){
       console.log("You do not have enough money");
-      errorMessage = `Minting a ticket requires ${adjustedPrice} $${this.state.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.coin} right now. You need to refill your wallet with more $${this.state.coin}`;
+      errorMessage = `Minting a ticket requires ${adjustedPrice} $${this.state.chain.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now. You need to refill your wallet with more $${this.state.chain.coin}`;
     }
     else{
       errorMessage:"";
@@ -175,9 +175,9 @@ class ClaimingForm extends Component{
           <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
                 <Form.Field>
                 <h3>Next ticket cost:</h3>
-                <div className={`${styles.marginBottom}`} >The price increases following a <a className={`a__underline__primary`} href={this.props.state.lnk_bondingCurve}>bonding curve</a>.</div>
+                <div className={`${styles.marginBottom}`} >The price increases following a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_bondingCurve}>bonding curve</a>.</div>
                 <Input
-                  label={{ basic: true, content: this.state.coin, id:"inputLabel" }}
+                  label={{ basic: true, content: this.state.chain.coin, id:"inputLabel" }}
                   labelPosition='right'
                   placeholder='Ether amount'
                   readOnly
@@ -186,7 +186,7 @@ class ClaimingForm extends Component{
                 </Form.Field>
                 <Form.Field className={`${styles.content}`} >
 
-                <h3>Upgrade to <a className={`a__underline__primary`} href={this.props.state.lnk_airdrop}>AIRDROP TICKET</a>:</h3>
+                <h3>Upgrade to <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_airdrop}>AIRDROP TICKET</a>:</h3>
                 <div>Pay 20% extra (optional) to get airdrops of the speaker's projects tokens</div>
                   <Checkbox
                     toggle
@@ -225,7 +225,7 @@ class ClaimingForm extends Component{
                   </div>
                 }
                 <h3 className="text-center">
-                  <a className={`a__underline__primary`} href={this.props.state.lnk_how_to_access}>How to use the tickets to access the conference</a>
+                  <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_how_to_access}>How to use the tickets to access the conference</a>
                 </h3>
       </Container>
     )

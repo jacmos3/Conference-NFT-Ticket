@@ -9,7 +9,7 @@ class SponsorshipForm extends Component{
     errorMessage:"",
     warningMessage:"",
     successMessage:'',
-    coin:"",
+    chain:{},
     sponsorPrice:0,
     checked:true,
     buttonLabel: "Sponsorize!",
@@ -23,9 +23,8 @@ class SponsorshipForm extends Component{
   componentDidMount(){
     var myChain = this.props.state.web3Settings.chains
       .filter(chain => chain.id === this.props.state.web3Settings.networkId);
-
-    this.setState({coin:myChain[0].coin, contractAddress:myChain[0].addr});
-    this.fetchInitialInfo();
+    this.setState({chain:myChain[0]});
+    //this.fetchInitialInfo();
   }
 
   async fetchInitialInfo() {
@@ -33,7 +32,7 @@ class SponsorshipForm extends Component{
       this.setState({loading: this.state.loading + 1, errorMessage: ''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
-          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress);
+          const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr);
           let sponsorPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.sponsorshipPrice().call()));
           let currentSponsor = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.sponsorPayment().call()));
           let paused = await instance.methods.paused().call();
@@ -45,7 +44,8 @@ class SponsorshipForm extends Component{
 
           if (sponsorPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
-            this.setState({sponsorPrice,currentSponsor,loading: this.state.loading +1,errorMessage:`Becoming the new sponsor requires ${sponsorPrice} $${this.state.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.coin} right now. You need to refill your wallet with more $${this.state.coin}`});
+            this.setState({sponsorPrice,currentSponsor,loading: this.state.loading +1,
+              errorMessage:`Becoming the new sponsor requires ${sponsorPrice} $${this.state.chain.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now. You need to refill your wallet with more $${this.state.chain.coin}`});
             return false;
           }
 
@@ -88,7 +88,7 @@ class SponsorshipForm extends Component{
     this.setState({loading:this.state.loading+1, errorMessage:'', warningMessage: "Confirm the transaction on your wallet and then wait for confirmation...", successMessage:""})
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
-      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.contractAddress );
+      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr );
       await instance.methods.sponsorship(this.state.sponsorQuote.toString()).send({from:accounts[0], value:this.props.state.web3.utils.toWei(this.state.sponsorPrice.toString(),"ether")});
       this.setState({successMessage:"Sponsorizing successfull! Your quote is now in all the conference NFT tickets!"});
     }
@@ -110,12 +110,12 @@ class SponsorshipForm extends Component{
     const result = value.replace(/[^a-z0-9 _.,:;!?$()\[\]{}\-\+\*]/gi, '');
     this.setState({ sponsorQuote:result});
     try{
-
         let temp = this.replaceText(this.state.element.image,result);
         let element = {"header": this.state.element.header,"image":temp};
         this.setState({element});
     }catch(err){
-      this.setState({errorMessage: err.message});
+      //this.setState({errorMessage: err.message});
+      console.log(err.message);
     }
   }
 
@@ -150,7 +150,7 @@ render(){
         <br />resulting as a temporary free advertisement!
       </p>
       <p className="text-indigo-800">
-        <a className={`a__underline__primary`} href={this.props.state.lnk_spnsr_read_more}> Read more... </a>
+        <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_spnsr_read_more}> Read more... </a>
       </p>
     <br />
      <h3 className="text-center text-trips-1">Invoice</h3>
@@ -162,11 +162,13 @@ render(){
         <div>
           <h3 className="text-center text-trips-1">Preview</h3>
           <p className="text-indigo-800">
-          This is a fac-simile NFT ticket containing the current sponsor quote.
-          <br />Please note: this is an example NFT. By becoming a sponsor you are <strong>not</strong> going to mint any NFT.
-          <br /><strong>Becoming Sponsor</strong> means <strong>replacing</strong> the current Sponsor quote <strong>with your Company Name</strong> (or quote) into the NFTs.
-          <br />Your sentence will appear in all the {this.state.totalSupply} Conference Ticket NFTs already minted and in any NFT ticket that will be minted.
-
+            This is a fac-simile NFT ticket containing the current sponsor quote.
+            <br />Please note: this is an example NFT. By becoming a sponsor you are <strong>not</strong> going to mint any NFT.
+            <br /><strong>Becoming Sponsor</strong> means <strong>replacing</strong> the current Sponsor quote <strong>with your Company Name</strong> (or quote) into the NFTs.
+            <br />Your sentence will appear in all the {this.state.totalSupply} Conference Ticket NFTs already minted and in any NFT ticket that will be minted.
+          </p>
+          <p className="text-indigo-800">
+            <a className={`a__underline__primary`} target="_blank" href={this.state.chain.marketplace}>Check the entire collection </a>
           </p>
           <div className={`${styles.centerCard}`}>
             {this.state.element.header.length > 0
@@ -193,9 +195,9 @@ render(){
     <h2 id="Sponsorize" className="text-center">Become the new Sponsor</h2>
         <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
               <Form.Field>
-              <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} {this.state.coin}</h3>
+              <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} {this.state.chain.coin}</h3>
               {this.state.currentSponsor != 0
-                ? <h4 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} {this.state.coin})</h4>
+                ? <h4 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} {this.state.chain.coin})</h4>
                 : <div></div>
               }
               <Input
@@ -217,10 +219,17 @@ render(){
                   </Message.Content>
                   <Icon name='circle notched' loading />
                 </Message>
-                <Message success header="Success!" content = {this.state.successMessage} />
+                <Message
+                  success
+                  header="Success!"
+                  >
+                  {this.state.successMessage}
+                  <p><a target="_blank" href={this.state.chain.marketplace}>Click here to see the entire collection on the marketplace</a></p>
+                </Message>
+
               </Form.Field>
               <div className="text-center">
-                By clicking the button below you are paying {this.state.sponsorPrice} {this.state.coin} for the sponsorship
+                By clicking the button below you are paying {this.state.sponsorPrice} {this.state.chain.coin} for the sponsorship
                 <button onClick = {this.onSponsorizing} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 35 || !this.state.understood}>
                   {this.state.buttonLabel}
                 </button>
