@@ -25,7 +25,6 @@ class MyDapp extends Component {
         lnk_bondingCurve:process.env.NEXT_PUBLIC_GEN_LNK_BONDING_CURVE,
         lnk_airdrop:process.env.NEXT_PUBLIC_GEN_LNK_AIRDROP,
         lnk_how_to_access:process.env.NEXT_PUBLIC_GEN_LNK_HOW_TO_ACCESS,
-        lnk_marketplace:process.env.NEXT_PUBLIC_GEN_LNK_MARKETPLACE,
         lnk_spnsr_read_more:process.env.NEXT_PUBLIC_GEN_LNK_SPONSOR_READ_MORE,
 
         web3Settings: {

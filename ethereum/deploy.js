@@ -21,8 +21,7 @@ const deploy = async() => {
   .send ({from: accounts[0]});
 
   console.log("Contract deployed to", contract.options.address);
-  fs.writeFileSync('../.env.local', '#THIS IS AN AUTO-GENERATED FILE. DO NOT ADD ELEMENT HERE OR THEY WILL BE CANCELED AT YOUR NEXT DEPLOY\r\nNEXT_PUBLIC_CONTRACT_ADDRESS = "'
-  + contract.options.address+'"');
+  //fs.writeFileSync('../.env.local', '#THIS IS AN AUTO-GENERATED FILE. DO NOT ADD ELEMENT HERE OR THEY WILL BE CANCELED AT YOUR NEXT DEPLOY\r\nNEXT_PUBLIC_CONTRACT_ADDRESS = "'+ contract.options.address+'"');
 }
 
 deploy();
