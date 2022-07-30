@@ -17,23 +17,23 @@ function Head() {
 
       {/* OG + Facebook */}
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://www.nft.web3intravel.com/" />
+      <meta property="og:url" content="https://www.ticket.web3intravel.com/" />
       <meta property="og:title" content="Web3 in Travel NFT Tickets" />
       <meta
         property="og:description"
         content="NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022 The first travel summit dedicated to the transition to Web3.Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
-      <meta property="og:image" content="www.nft.web3intravel.com/meta.png" />
+      <meta property="og:image" content="www.ticket.web3intravel.com/meta.png" />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content="https://www.nft.web3intravel.com/" />
+      <meta property="twitter:url" content="https://www.ticket.web3intravel.com/" />
       <meta property="twitter:title" content="Web3 in Travel NFT Tickets" />
       <meta
         property="twitter:description"
         content="NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022 The first travel summit dedicated to the transition to Web3.Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
-      <meta property="twitter:image" content="https://www.nft.web3intravel.com/meta.png" />
+      <meta property="twitter:image" content="https://www.ticket.web3intravel.com/meta.png" />
 
       {/* Font */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
