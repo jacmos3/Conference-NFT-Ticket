@@ -235,9 +235,13 @@ class ClaimingForm extends Component{
                     <Card.Group itemsPerRow={3} stackable={true} doubling={true} centered items={this.state.all} />
                   </div>
                 }
-                <h3 className="text-center">
-                  <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_how_to_access}>How to use the tickets to access the conference</a>
-                </h3>
+                {
+                  /*
+                  <h3 className="text-center">
+                    <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_how_to_access}>How to use the tickets to access the conference</a>
+                  </h3>
+                  */
+                }
       </Container>
     )
   };

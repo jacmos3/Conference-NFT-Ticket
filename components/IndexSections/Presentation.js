@@ -34,7 +34,7 @@ class Presentation extends Component {
                             </a>
                         </div>
                         <div className="text__content">
-                          <a className={`a__underline__primary`} href="#">Learn more...</a>
+                          <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_learn_more}>Learn more...</a>
                         </div>
                         </div>
                     </div>

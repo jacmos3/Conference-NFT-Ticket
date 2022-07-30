@@ -26,6 +26,7 @@ class MyDapp extends Component {
         lnk_airdrop:process.env.NEXT_PUBLIC_GEN_LNK_AIRDROP,
         lnk_how_to_access:process.env.NEXT_PUBLIC_GEN_LNK_HOW_TO_ACCESS,
         lnk_spnsr_read_more:process.env.NEXT_PUBLIC_GEN_LNK_SPONSOR_READ_MORE,
+        lnk_learn_more:process.env.NEXT_PUBLIC_GEN_LNK_LEARN_MORE,
 
         web3Settings: {
             infura: process.env.NEXT_PUBLIC_WEB3SETTINGS_INFURA,
