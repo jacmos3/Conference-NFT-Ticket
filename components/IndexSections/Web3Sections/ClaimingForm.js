@@ -34,20 +34,11 @@ class ClaimingForm extends Component{
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr);
-          let adjustedPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call())).toFixed(2);
 
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
             this.setState({adjustedPrice,buttonLabel:"Minting paused",loading: this.state.loading +1,errorMessage:"The NFT minting has been paused. Come back later!"});
-            return false;
-          }
-
-          if (adjustedPrice > this.props.state.web3Settings.ethBalance){
-            console.log("You do not have enough money");
-            this.setState({adjustedPrice,loading: this.state.loading +1,
-              errorMessage:`Minting a ticket requires ${adjustedPrice} $${this.state.chain.coin}
-              and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now.`});
             return false;
           }
 
@@ -57,6 +48,14 @@ class ClaimingForm extends Component{
           if (totalSupply >= maxSupply){
             console.log("minting finished");
             this.setState({buttonLabel:"Minting finished",loading: this.state.loading +1});
+            return false;
+          }
+          let adjustedPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call())).toFixed(2);
+          if (adjustedPrice > this.props.state.web3Settings.ethBalance){
+            console.log("You do not have enough money");
+            this.setState({totalSupply,adjustedPrice,loading: this.state.loading +1,
+              errorMessage:`Minting a ticket requires ${adjustedPrice} $${this.state.chain.coin}
+              and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now.`});
             return false;
           }
 
@@ -175,7 +174,7 @@ class ClaimingForm extends Component{
   render(){
     return (
       <Container>
-      <h2 className="text-center">You are minting NFT ticket #{1 + 1 * this.state.totalSupply}</h2>
+      <h2 className="text-center">You are minting NFT ticket #{1 + this.state.totalSupply}</h2>
       <br />
           <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
                 <Form.Field>
