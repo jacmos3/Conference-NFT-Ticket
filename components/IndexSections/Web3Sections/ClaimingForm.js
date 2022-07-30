@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Form,Field,Input,Message,Button,Container,Checkbox,Card,Icon} from 'semantic-ui-react';
 import Conference from '../../../ethereum/build/Conference.sol.json';
 import styles from "../../../styles/components/Web3Sections/ClaimingForm.module.scss";
+import confetti from 'canvas-confetti';
 
 class ClaimingForm extends Component{
   state = {
@@ -26,6 +27,44 @@ class ClaimingForm extends Component{
     //var coin = myChain.map(chain => chain.options.coin)[0];
     this.setState({chain:myChain[0]});
     this.fetchInitialInfo(true);
+  }
+
+  happyShalala(){
+    const confetti = require('canvas-confetti').default;
+
+    var count = 200;
+    var defaults = {
+      origin: { y: 0.7 }
+    };
+
+    function fire(particleRatio, opts) {
+      confetti(Object.assign({}, defaults, opts, {
+        particleCount: Math.floor(count * particleRatio)
+      }));
+    }
+
+    fire(0.25, {
+      spread: 26,
+      startVelocity: 55,
+    });
+    fire(0.2, {
+      spread: 60,
+    });
+    fire(0.35, {
+      spread: 100,
+      decay: 0.91,
+      scalar: 0.8
+    });
+    fire(0.1, {
+      spread: 120,
+      startVelocity: 25,
+      decay: 0.92,
+      scalar: 1.2
+    });
+    fire(0.1, {
+      spread: 120,
+      startVelocity: 45,
+    });
   }
 
   async fetchInitialInfo(firstFetch) {
@@ -93,9 +132,10 @@ class ClaimingForm extends Component{
         });
       this.fetchNFTList();
       this.setState({successMessage:"Minting successfull! check your ticket below:", errorMessage: ""});
+      this.happyShalala();
     }
     catch(err){
-      this.setState({errorMessage: err.message,warningMessage: ""});
+      this.setState({errorMessage: err.message, warningMessage: ""});
 
     }
     this.fetchInitialInfo(false);

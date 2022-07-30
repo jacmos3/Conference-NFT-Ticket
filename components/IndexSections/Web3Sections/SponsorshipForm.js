@@ -2,7 +2,9 @@ import React, {Component} from 'react';
 import {Form,Field,Input,Message,Button,Container,Checkbox,Card,Image, Icon} from 'semantic-ui-react';
 import Conference from '../../../ethereum/build/Conference.sol.json';
 import styles from "../../../styles/components/Web3Sections/SponsorshipForm.module.scss";
-import Ticket from '../../../public/img/Ticket.svg'
+import Ticket from '../../../public/img/Ticket.svg';
+import confetti from 'canvas-confetti';
+
 class SponsorshipForm extends Component{
   state = {
     loading:0,
@@ -25,6 +27,31 @@ class SponsorshipForm extends Component{
       .filter(chain => chain.id === this.props.state.web3Settings.networkId);
     this.setState({chain:myChain[0]});
     this.fetchInitialInfo();
+  }
+
+  happyShalala(){
+    const confetti = require('canvas-confetti').default;
+
+    var duration = 10 * 1000;
+    var animationEnd = Date.now() + duration;
+    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    var interval = setInterval(function() {
+      var timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      var particleCount = 50 * (timeLeft / duration);
+      // since particles fall down, start a bit higher than random
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+    }, 250);
   }
 
   async fetchInitialInfo() {
@@ -91,6 +118,7 @@ class SponsorshipForm extends Component{
       const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr );
       await instance.methods.sponsorship(this.state.sponsorQuote.toString()).send({from:accounts[0], value:this.props.state.web3.utils.toWei(this.state.sponsorPrice.toString(),"ether")});
       this.setState({successMessage:"Sponsorizing successfull! Your quote is now in all the conference NFT tickets!"});
+      this.happyShalala();
     }
     catch(err){
       //console.log(err);
@@ -197,7 +225,7 @@ render(){
               <Form.Field>
               <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} {this.state.chain.coin}</h3>
               {this.state.currentSponsor != 0
-                ? <h4 className="text-center">(Old sponsor paid: ${this.state.currentSponsor} {this.state.chain.coin})</h4>
+                ? <h4 className="text-center">(Previous sponsor paid: ${this.state.currentSponsor} {this.state.chain.coin})</h4>
                 : <div></div>
               }
               <Input
