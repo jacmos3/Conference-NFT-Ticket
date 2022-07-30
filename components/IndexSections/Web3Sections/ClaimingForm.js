@@ -131,14 +131,15 @@ class ClaimingForm extends Component{
           value:(this.props.state.web3.utils.toWei(this.state.adjustedPrice.toString(),"ether"))
         });
       this.fetchNFTList();
-      this.setState({successMessage:"Minting successfull! check your ticket below:", errorMessage: ""});
+      this.fetchInitialInfo(false); //dont move it under the setState, otherwise the successMessage would be overwritten
+      this.setState({successMessage:"Minting successfull! check your ticket below", errorMessage: ""});
       this.happyShalala();
     }
     catch(err){
+      this.fetchInitialInfo(false);
       this.setState({errorMessage: err.message, warningMessage: ""});
-
     }
-    this.fetchInitialInfo(false);
+
 
     this.setState({loading:this.state.loading-1,warningMessage: ""});
     console.log("end mint");
