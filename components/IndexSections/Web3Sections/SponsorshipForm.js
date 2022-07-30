@@ -60,8 +60,8 @@ class SponsorshipForm extends Component{
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr);
-          let sponsorPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.sponsorshipPrice().call()));
-          let currentSponsor = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.sponsorPayment().call()));
+          let sponsorPrice = this.props.state.web3.utils.fromWei(await instance.methods.sponsorshipPrice().call());
+          let currentSponsor = this.props.state.web3.utils.fromWei(await instance.methods.sponsorPayment().call());
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
