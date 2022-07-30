@@ -45,7 +45,7 @@ class SponsorshipForm extends Component{
           if (sponsorPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
             this.setState({sponsorPrice,currentSponsor,loading: this.state.loading +1,
-              errorMessage:`Becoming the new sponsor requires ${sponsorPrice} $${this.state.chain.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now. You need to refill your wallet with more $${this.state.chain.coin}`});
+              errorMessage:`Becoming the new sponsor requires ${sponsorPrice} $${this.state.chain.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now.`});
             return false;
           }
 
@@ -211,7 +211,18 @@ render(){
               />
               </Form.Field>
               <Form.Field>
-                <Message error header="Oops!" content = {this.state.errorMessage} />
+                <Message error header="Oops!">
+                 {this.state.errorMessage}
+                 {this.state.sponsorPrice > this.props.state.web3Settings.ethBalance
+                   ?
+                    <a className={`text-indigo-800 a__underline__secondary`}
+                      target="_blank"
+                      href={this.state.chain.buy}> Buy ${this.state.chain.coin} here!
+                    </a>
+                  : <div></div>
+                 }
+
+                </Message>
                 <Message warning icon >
                   <Message.Content>
                     <Message.Header>Pending user confirmation...</Message.Header>

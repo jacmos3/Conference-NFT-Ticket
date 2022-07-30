@@ -38,7 +38,8 @@ class MyDapp extends Component {
                 //   addr:process.env.NEXT_PUBLIC_RINKEBY_CONTRACT_ADDRESS,
                 //   marketplace:process.env.NEXT_PUBLIC_RINKEBY_MARKETPLACE,
                 //   marketCard:process.env.NEXT_PUBLIC_RINKEBY_MARKETCARD,
-                //   coin:process.env.NEXT_PUBLIC_RINKEBY_COIN
+                //   coin:process.env.NEXT_PUBLIC_RINKEBY_COIN,
+                //   buy:process.env.NEXT_PUBLIC_RINKEBY_BUY
                 // },
                 {
                   name:process.env.NEXT_PUBLIC_KILN_NAME,
@@ -46,7 +47,8 @@ class MyDapp extends Component {
                   addr:process.env.NEXT_PUBLIC_KILN_CONTRACT_ADDRESS,
                   marketplace:process.env.NEXT_PUBLIC_KILN_MARKETPLACE,
                   marketCard:process.env.NEXT_PUBLIC_KILN_MARKETCARD,
-                  coin:process.env.NEXT_PUBLIC_KILN_COIN
+                  coin:process.env.NEXT_PUBLIC_KILN_COIN,
+                  buy:process.env.NEXT_PUBLIC_KILN_BUY
                 },
                 {
                   name:process.env.NEXT_PUBLIC_GNOSIS_NAME,
@@ -54,7 +56,8 @@ class MyDapp extends Component {
                   addr:process.env.NEXT_PUBLIC_GNOSIS_CONTRACT_ADDRESS,
                   marketplace:process.env.NEXT_PUBLIC_GNOSIS_MARKETPLACE,
                   marketCard:process.env.NEXT_PUBLIC_GNOSIS_MARKETCARD,
-                  coin:process.env.NEXT_PUBLIC_GNOSIS_COIN
+                  coin:process.env.NEXT_PUBLIC_GNOSIS_COIN,
+                  buy:process.env.NEXT_PUBLIC_GNOSIS_BUY
                 }
           ],
         }
