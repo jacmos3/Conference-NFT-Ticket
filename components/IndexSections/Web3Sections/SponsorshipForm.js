@@ -72,13 +72,6 @@ class SponsorshipForm extends Component{
             return false;
           }
 
-          if (sponsorPrice > this.props.state.web3Settings.ethBalance){
-            console.log("You do not have enough money");
-            this.setState({sponsorPrice,currentSponsor,loading: this.state.loading +1,
-              errorMessage:`Becoming the new sponsor requires ${sponsorPrice} $${this.state.chain.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now.`});
-            return false;
-          }
-
           let totalSupply = parseInt(await instance.methods.totalSupply().call());
           let maxSupply = parseInt(await instance.methods.MAX_ID().call());
 
@@ -92,6 +85,13 @@ class SponsorshipForm extends Component{
 
           let element = {"header":"FAC-SIMILE NFT TICKET","image":uri.image};
           this.setState({element});
+
+          if (sponsorPrice > this.props.state.web3Settings.ethBalance){
+            console.log("You do not have enough money");
+            this.setState({sponsorPrice,currentSponsor,loading: this.state.loading +1,
+              errorMessage:`Becoming the new sponsor requires ${sponsorPrice} $${this.state.chain.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now.`});
+            return false;
+          }
 
           if (totalSupply >= maxSupply){
             console.log("minting finished");
