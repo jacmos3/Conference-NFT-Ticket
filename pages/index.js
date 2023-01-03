@@ -42,15 +42,15 @@ class MyDapp extends Component {
                 //   coin:process.env.NEXT_PUBLIC_RINKEBY_COIN,
                 //   buy:process.env.NEXT_PUBLIC_RINKEBY_BUY
                 // },
-                {
-                  name:process.env.NEXT_PUBLIC_KILN_NAME,
-                  id:parseInt(process.env.NEXT_PUBLIC_KILN_ID),
-                  addr:process.env.NEXT_PUBLIC_KILN_CONTRACT_ADDRESS,
-                  marketplace:process.env.NEXT_PUBLIC_KILN_MARKETPLACE,
-                  marketCard:process.env.NEXT_PUBLIC_KILN_MARKETCARD,
-                  coin:process.env.NEXT_PUBLIC_KILN_COIN,
-                  buy:process.env.NEXT_PUBLIC_KILN_BUY
-                },
+                // {
+                //   name:process.env.NEXT_PUBLIC_KILN_NAME,
+                //   id:parseInt(process.env.NEXT_PUBLIC_KILN_ID),
+                //   addr:process.env.NEXT_PUBLIC_KILN_CONTRACT_ADDRESS,
+                //   marketplace:process.env.NEXT_PUBLIC_KILN_MARKETPLACE,
+                //   marketCard:process.env.NEXT_PUBLIC_KILN_MARKETCARD,
+                //   coin:process.env.NEXT_PUBLIC_KILN_COIN,
+                //   buy:process.env.NEXT_PUBLIC_KILN_BUY
+                // },
                 {
                   name:process.env.NEXT_PUBLIC_GNOSIS_NAME,
                   id:parseInt(process.env.NEXT_PUBLIC_GNOSIS_ID),

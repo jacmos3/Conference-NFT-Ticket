@@ -89,6 +89,11 @@ class ClaimingForm extends Component{
             this.setState({buttonLabel:"Minting finished",loading: this.state.loading +1});
             return false;
           }
+
+          if (firstFetch){
+            this.fetchNFTList();
+          }
+          
           let adjustedPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call())).toFixed(2);
           if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
@@ -101,9 +106,7 @@ class ClaimingForm extends Component{
           //console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + price + " " + paused);
           this.setState({totalSupply,maxSupply,adjustedPrice,loading: this.state.loading -1, errorMessage: ""});
           console.log("end try Info - success");
-          if (firstFetch){
-            this.fetchNFTList();
-          }
+
           return adjustedPrice;
       } catch (err) {
         console.log(err);
