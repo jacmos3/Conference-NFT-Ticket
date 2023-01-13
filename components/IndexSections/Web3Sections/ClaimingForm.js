@@ -93,8 +93,8 @@ class ClaimingForm extends Component{
           if (firstFetch){
             this.fetchNFTList();
           }
-          
-          let adjustedPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call())).toFixed(2);
+
+          let adjustedPrice = this.props.state.web3.utils.fromWei(await instance.methods.price().call());
           if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
             this.setState({totalSupply,adjustedPrice,loading: this.state.loading +1,
@@ -203,7 +203,7 @@ class ClaimingForm extends Component{
       return;
     }
     console.log("cheked: " + checked);
-    var adjustedPrice = checked ? (this.state.adjustedPrice * this.state.multiplier).toFixed(2) : (this.state.adjustedPrice / this.state.multiplier).toFixed(2);
+    var adjustedPrice = checked ? this.state.adjustedPrice * this.state.multiplier : this.state.adjustedPrice / this.state.multiplier;
     var errorMessage = "";
     if (adjustedPrice > this.props.state.web3Settings.ethBalance){
       console.log("You do not have enough money");

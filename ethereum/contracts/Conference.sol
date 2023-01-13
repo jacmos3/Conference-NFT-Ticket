@@ -1287,10 +1287,9 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
 contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     bool public paused;
     uint16 public constant MAX_ID = 500;
-    uint256 public constant INITIAL_PRICE  = 25 ether;
-    uint256 public constant END_PRICE = 75 ether;
-    uint256 public constant INITIAL_SPONSOR_PRICE = 500 ether;
-    uint256 private constant EXP = 10**18;
+    uint256 public constant INITIAL_PRICE  = 25000000 wei;
+    uint256 public constant END_PRICE = 75000000 wei;
+    uint256 public constant INITIAL_SPONSOR_PRICE = 500000000 wei;
     uint256 private sumIncrement = 0;
     uint256 private dateTime;
     uint256 public price;
@@ -1341,23 +1340,23 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     event Paused(bool paused);
 
     constructor() ERC721("Web3 In Travel NFT Ticket", "WEB3INTRAVEL") Ownable(){
-        details[DET_TITLE] = "WEB3 IN TRAVEL SUMMIT";
+        details[DET_TITLE] = "WEB3 IN TRAVEL - II Edition";
         details[DET_SUBTITLE] = "Helping the travel industry's transition to Web3";
-        details[DET_CITY] = "Porto, Portugal";
-        details[DET_DATE] = "14 SEPT 2022";
-        details[DET_DATE_LONG] = "14th of September 2022";
+        details[DET_CITY] = "Barcelona, Spain";
+        details[DET_DATE] = "15 MAY 2023";
+        details[DET_DATE_LONG] = "15th of May 2023";
         details[DET_TIME] = "10 am - 6 pm";
         details[DET_TIME_LONG] = "From 10 am to 6 pm";
         details[DET_SPONSOR_QUOTE] = "";
         details[DET_SPONSOR_QUOTE_LONG] = "";
-        details[DET_ADDRESS_LOCATION] = "EDIFICIO DA ALFANDEGA, R. Nova da Alfandega";
+        details[DET_ADDRESS_LOCATION] = "World Trade Center, Barcelona";
         details[DET_CREDITS] = "Web3InTravel.com by TripsCommunity in partnership with VRWS";
         details[DET_TYPE] = TYPE_STANDARD;
         sponsorshipPrice = INITIAL_SPONSOR_PRICE;
         price = INITIAL_PRICE;
         treasurer = 0xce73904422880604e78591fD6c758B0D5106dD50; //TripsCommunity address
-        paused = true;
-        dateTime = 1664582399; //30 september 23.59.59 UTC
+        paused = false;
+        dateTime = 1693432800; //31 august 2023
     }
 
     function claimByOwner() external onlyOwner {
@@ -1384,7 +1383,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         mintedBy[_tokenId] = _sender;
         airdrop[_tokenId] = _airdrop;
         sumIncrement += ((END_PRICE - INITIAL_PRICE) - sumIncrement)/10;
-        price = INITIAL_PRICE + (sumIncrement / EXP)*EXP;
+        price = INITIAL_PRICE + sumIncrement;
         emit Minting(_sender, _tokenId, _msgValue, _airdrop);
         _safeMint(_sender, _tokenId);
     }
@@ -1413,19 +1412,31 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         emit NewSponsorship(_sender, sponsorPayment, _quote);
     }
 
+    function composePriceToDisplay(uint256 _price) internal pure returns (string memory){
+        string memory priceLeft = string(abi.encodePacked(toString(_price / 1 ether)));
+        string memory priceRight = string(abi.encodePacked(toString(_price % 1 ether)));
+        uint256 len = 18 - bytes(priceRight).length;
+        uint256 l = 0;
+         while (l < len) {
+             priceRight = string(abi.encodePacked("0",priceRight));
+            l++;
+        }
+
+        return string(abi.encodePacked(priceLeft,'.',priceRight));
+    }
     function tokenURI(uint256 _tokenId) override public view returns (string memory) {
         require(_tokenId <= totalSupply(), ERR_NOT_EXISTS);
-        string memory _details_type = airdrop[_tokenId] ? TYPE_AIRDROP : TYPE_STANDARD;
         string memory _details_ticket_number = string(abi.encodePacked(DET_TICKET_NUMBER,toString(_tokenId)));
+
         string[5] memory parts;
-        parts[0] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.a { fill:white; font-family: serif; font-size: 20px; } .a1 { fill:white; font-family: serif; font-size: 16px; } .b { fill:white; font-family: serif; font-size: 14px; } .c { fill:white; font-family: serif; font-size: 8px; }</style> <rect width="100%" height="100%" fill="#467494" />'));
-        parts[1] = string(abi.encodePacked('<text class="a" x="175" y="40"  text-anchor="middle" >',details[DET_TITLE],'</text><text class="a1" x="175" y="60"  text-anchor="middle" >',details[DET_SUBTITLE],'</text><text x="175" y="90" text-anchor="middle" class="a1">',_details_ticket_number,'</text>'));
-        parts[2] = string(abi.encodePacked('<text x="10" y="110" class="b">',details[DET_CITY],'</text><text x="10" y="130" class="b">',details[DET_ADDRESS_LOCATION],'</text><text x="10" y="150" class="b">',details[DET_DATE_LONG],'</text><text x="10" y="170" class="b">',details[DET_TIME_LONG],'</text>'));
-        parts[3] = string(abi.encodePacked('<text x="10" y="190" class="b">$',toString(prices[_tokenId] / EXP),' xDAI</text><text x="10" y="210" class="b">0x',toAsciiString(mintedBy[_tokenId]),'</text><text x="10" y="230" class="b">',_details_type,'</text>'));
-        parts[4] = string(abi.encodePacked('<text x="175" y="250" class="b" text-anchor="middle" >',details[DET_SPONSOR_QUOTE_LONG],'</text><text x="175" y="330" text-anchor="middle" class="c">',details[DET_CREDITS],'</text>',details[DET_LOGO],'</svg>'));
+        parts[0] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.a { fill:white; font: bold 20px sans-serif; } .b { fill:white; font: 12px sans-serif; } .c { fill:white; font: bold 16px sans-serif; } .d { fill:white; font: bold 14px sans-serif; } .e { fill:white; font: 12px sans-serif; } .f { fill:white; font: 8px sans-serif; }</style> <rect width="100%" height="100%" fill="#4285f4" />'));
+        parts[1] = string(abi.encodePacked('<text class="a" x="175" y="40"  text-anchor="middle" >',details[DET_TITLE],'</text><text class="b" x="175" y="60"  text-anchor="middle" >',details[DET_SUBTITLE],'</text><text x="175" y="90" text-anchor="middle" class="c">NFT TICKET ',_details_ticket_number,'</text>'));
+        parts[2] = string(abi.encodePacked('<text x="175" y="130" text-anchor="middle" class="d">',details[DET_ADDRESS_LOCATION],'</text><text x="175" y="150" text-anchor="middle" class="d">',details[DET_DATE_LONG],' (',details[DET_TIME],')</text><text x="175" y="190" class="d" text-anchor="middle" >',details[DET_SPONSOR_QUOTE_LONG],'</text>'));
+        parts[3] = string(abi.encodePacked('<text x="175" y="230" text-anchor="middle" class="d">Dynamic price: $ETH ',composePriceToDisplay(prices[_tokenId]),'</text><text x="175" y="305" text-anchor="middle" class="e">minted by:</text><text x="175" y="320" text-anchor="middle" class="e">0x',toAsciiString(mintedBy[_tokenId]),'</text>'));
+        parts[4] = string(abi.encodePacked('<text x="175" y="340" text-anchor="middle" class="f">',details[DET_CREDITS],'</text>',details[DET_LOGO],'</svg>'));
 
         string memory compact = string(abi.encodePacked(parts[0],parts[1],parts[2],parts[3],parts[4]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "Ticket #', toString(_tokenId), '", "description": "NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022. The first travel summit dedicated to the transition to Web3. Speeches, panels and workshops to help the industry upgrade to the new internet.", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(compact)), '","attributes":[',metadata(_tokenId),']}'))));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "Ticket #', toString(_tokenId), '", "description": "NFT ticket for -WEB3 IN TRAVEL- Summit. Barcelona, 15th of May 2022. The first travel summit dedicated to the transition to Web3. Speeches, panels and workshops to help the industry upgrade to the new internet.", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(compact)), '","attributes":[',metadata(_tokenId),']}'))));
 
         return string(abi.encodePacked('data:application/json;base64,', json));
     }

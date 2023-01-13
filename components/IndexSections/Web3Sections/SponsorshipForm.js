@@ -301,7 +301,7 @@ render(){
                     </Form.Field>
                     <div className="text-center">
                       By clicking the button below you are paying {this.state.sponsorPrice} {this.state.chain.coin} for the sponsorship
-                      <button onClick = {this.onSponsorship} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 35 || !this.state.understood}>
+                      <button onClick = {this.onSponsorship} className={`btn btn__primary`} disabled={this.state.loading > 0 || this.state.sponsorQuote.length == 0 || this.state.sponsorQuote.length > 32 || !this.state.understood}>
                         {this.state.buttonLabel}
                       </button>
                     </div>

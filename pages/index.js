@@ -42,24 +42,24 @@ class MyDapp extends Component {
                 //   coin:process.env.NEXT_PUBLIC_RINKEBY_COIN,
                 //   buy:process.env.NEXT_PUBLIC_RINKEBY_BUY
                 // },
-                // {
-                //   name:process.env.NEXT_PUBLIC_KILN_NAME,
-                //   id:parseInt(process.env.NEXT_PUBLIC_KILN_ID),
-                //   addr:process.env.NEXT_PUBLIC_KILN_CONTRACT_ADDRESS,
-                //   marketplace:process.env.NEXT_PUBLIC_KILN_MARKETPLACE,
-                //   marketCard:process.env.NEXT_PUBLIC_KILN_MARKETCARD,
-                //   coin:process.env.NEXT_PUBLIC_KILN_COIN,
-                //   buy:process.env.NEXT_PUBLIC_KILN_BUY
-                // },
                 {
-                  name:process.env.NEXT_PUBLIC_GNOSIS_NAME,
-                  id:parseInt(process.env.NEXT_PUBLIC_GNOSIS_ID),
-                  addr:process.env.NEXT_PUBLIC_GNOSIS_CONTRACT_ADDRESS,
-                  marketplace:process.env.NEXT_PUBLIC_GNOSIS_MARKETPLACE,
-                  marketCard:process.env.NEXT_PUBLIC_GNOSIS_MARKETCARD,
-                  coin:process.env.NEXT_PUBLIC_GNOSIS_COIN,
-                  buy:process.env.NEXT_PUBLIC_GNOSIS_BUY
-                }
+                  name:process.env.NEXT_PUBLIC_GOERLI_NAME,
+                  id:parseInt(process.env.NEXT_PUBLIC_GOERLI_ID),
+                  addr:process.env.NEXT_PUBLIC_GOERLI_CONTRACT_ADDRESS,
+                  marketplace:process.env.NEXT_PUBLIC_GOERLI_MARKETPLACE,
+                  marketCard:process.env.NEXT_PUBLIC_GOERLI_MARKETCARD,
+                  coin:process.env.NEXT_PUBLIC_GOERLI_COIN,
+                  buy:process.env.NEXT_PUBLIC_GOERLI_BUY
+                },
+                // {
+                //   name:process.env.NEXT_PUBLIC_GNOSIS_NAME,
+                //   id:parseInt(process.env.NEXT_PUBLIC_GNOSIS_ID),
+                //   addr:process.env.NEXT_PUBLIC_GNOSIS_CONTRACT_ADDRESS,
+                //   marketplace:process.env.NEXT_PUBLIC_GNOSIS_MARKETPLACE,
+                //   marketCard:process.env.NEXT_PUBLIC_GNOSIS_MARKETCARD,
+                //   coin:process.env.NEXT_PUBLIC_GNOSIS_COIN,
+                //   buy:process.env.NEXT_PUBLIC_GNOSIS_BUY
+                // }
           ],
         }
     };
