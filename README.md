@@ -5,7 +5,7 @@ This dApp is great for those who are planning to organize a IRL (In Real Life) e
 
 It provides a basic interface written in reactjs and the smart contract in solidity.
 
-##MINTING
+## MINTING
 Once setupped and deployed, the dApp could be used from users to mint (buy) NFT tickets for the conference.
 
 The smart contract is studied to be deployed on Gnosis Chain (because it has a stable coin as gas coin),
@@ -13,7 +13,7 @@ and the price of the ticket minting is following a bounding curve to incentivize
 
 Price increase in price for every new minting, untill it reaches the initial target price.
 
-##SPONSORSHIP
+## SPONSORSHIP
 Partners could use the dApp for buying a sponsorship for the event!
 The smart contract allows permissionless sponsorships!
 This is an innovation in the field because it opens an interesting scenario, where sponsor do not need to get in contract
