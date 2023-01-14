@@ -1412,18 +1412,62 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         emit NewSponsorship(_sender, sponsorPayment, _quote);
     }
 
-    function composePriceToDisplay(uint256 _price) internal pure returns (string memory){
+    function getSlice(uint end, string memory inputString) public pure returns (string memory) {
+        bytes memory myBytes = bytes(inputString);
+        bytes memory extractedBytes = new bytes(end + 1);
+        uint index = 0;
+
+        for (uint i = 0; i < end; i++) {
+            if (myBytes[i] != 0x00){
+                extractedBytes[index] = myBytes[i];
+            }
+            else{
+                extractedBytes[index] = 0x30;
+            }
+            index++;
+        }
+        extractedBytes[end] = 0x30;
+        return string(extractedBytes);
+    }
+
+
+    function countTrailingZeros(string memory inputString) internal pure returns (uint) {
+        bytes memory myBytes = bytes(inputString);
+        uint count = 0;
+        for (uint256 i = myBytes.length - 1; i >= 0; i--) {
+            if (myBytes[i] == 0x30) {
+                count++;
+            } else {
+                break;
+            }
+        }
+        return count;
+    }
+
+    function trim(string memory priceRight) internal pure returns (string memory){
+        uint index = 18 - countTrailingZeros(priceRight);
+        if(index > bytes(priceRight).length) {
+            return priceRight;
+        }
+        return getSlice(index, priceRight);
+    }
+
+    function composePriceToDisplay(uint256 _price) public pure returns (string memory){
+        if (_price == 0)
+            return "0.0";
+
         string memory priceLeft = string(abi.encodePacked(toString(_price / 1 ether)));
         string memory priceRight = string(abi.encodePacked(toString(_price % 1 ether)));
         uint256 len = 18 - bytes(priceRight).length;
         uint256 l = 0;
          while (l < len) {
-             priceRight = string(abi.encodePacked("0",priceRight));
+            priceRight = string(abi.encodePacked("0",priceRight));
             l++;
         }
 
-        return string(abi.encodePacked(priceLeft,'.',priceRight));
+        return string(abi.encodePacked(priceLeft,'.',trim(priceRight)));
     }
+
     function tokenURI(uint256 _tokenId) override public view returns (string memory) {
         require(_tokenId <= totalSupply(), ERR_NOT_EXISTS);
         string memory _details_ticket_number = string(abi.encodePacked(DET_TICKET_NUMBER,toString(_tokenId)));
