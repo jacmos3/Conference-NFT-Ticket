@@ -203,7 +203,8 @@ class ClaimingForm extends Component{
       return;
     }
     console.log("cheked: " + checked);
-    var adjustedPrice = checked ? this.state.adjustedPrice * this.state.multiplier : this.state.adjustedPrice / this.state.multiplier;
+    var adjustedPrice = (checked ? this.state.adjustedPrice * this.state.multiplier : this.state.adjustedPrice / this.state.multiplier).toFixed(18);
+
     var errorMessage = "";
     if (adjustedPrice > this.props.state.web3Settings.ethBalance){
       console.log("You do not have enough money");
