@@ -18,6 +18,7 @@ class ClaimingForm extends Component{
     multiplier:1.2,
     isOwningLittleTraveler : false,
     lTPercentageDiscount : 0,
+    usdPrice:0
   }
   constructor(props){
     super(props);
@@ -29,6 +30,12 @@ class ClaimingForm extends Component{
     //var coin = myChain.map(chain => chain.options.coin)[0];
     this.setState({chain:myChain[0]});
     await this.fetchInitialInfo(true);
+    const coingeckoPrice = await fetch(
+     'https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd'
+    );
+    const data = await coingeckoPrice.json();
+    this.setState({ usdPrice: data["matic-network"].usd });
+
   }
 
   happyShalala(){
@@ -258,13 +265,15 @@ class ClaimingForm extends Component{
                   readOnly
                   value = {this.state.adjustedPrice}
                 />
+                <h4>${(this.state.adjustedPrice * this.state.usdPrice).toFixed(2) } at the real time rate of ${this.state.usdPrice} per {this.state.chain.coin}</h4>
                 </Form.Field>
                 <Form.Field className={`${styles.content}`} >
+                <h4>NOTE:</h4>
                 {this.state.isOwningLittleTraveler ?
                   <p>You are enjoying a {this.state.lTPercentageDiscount}% discount because you own a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a></p>
                   :
-                <p>Get a {this.state.lTPercentageDiscount}% discount on ticket price by purchasing a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a> first</p>
-              }
+                  <p>Get a {this.state.lTPercentageDiscount}% discount on ticket price by purchasing a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a> first</p>
+                }
                 <h3>Upgrade to <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_airdrop}>AIRDROP TICKET</a>:</h3>
                 <div>Pay 20% extra (optional) to get airdrops of the speaker's projects tokens</div>
                   <Checkbox
