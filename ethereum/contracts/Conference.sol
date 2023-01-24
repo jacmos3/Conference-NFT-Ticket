@@ -1287,9 +1287,9 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
 contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     bool public paused;
     uint16 public constant MAX_ID = 500;
-    uint256 public constant INITIAL_PRICE  = 25000000 wei;
-    uint256 public constant END_PRICE = 75000000 wei;
-    uint256 public constant INITIAL_SPONSOR_PRICE = 500000000 wei;
+    uint256 public constant INITIAL_PRICE  = 79000000000000000000 wei;
+    uint256 public constant END_PRICE = 169000000000000000000 wei;
+    uint256 public constant INITIAL_SPONSOR_PRICE = 500000000000000000000 wei;
     uint256 private sumIncrement = 0;
     uint256 private dateTime;
     uint256 public lTPercentageDiscount;
@@ -1360,8 +1360,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         sponsorshipPrice = INITIAL_SPONSOR_PRICE;
         price = INITIAL_PRICE;
         treasurer = 0xce73904422880604e78591fD6c758B0D5106dD50; //TripsCommunity address
-        //littleTravelerAddress = 0x37CAB9F09a2FfA8C8650DD3De3594e1Cf2F38A84; //little traveler address on polygon
-        littleTravelerAddress = 0x4C153BFaD26628BdbaFECBCD160A0790b1b8F212; // test token
+        littleTravelerAddress = 0x37CAB9F09a2FfA8C8650DD3De3594e1Cf2F38A84; //little traveler address on polygon
         paused = false;
         dateTime = 1693432800; //31 august 2023
         lTPercentageDiscount = 50; // it's 50%

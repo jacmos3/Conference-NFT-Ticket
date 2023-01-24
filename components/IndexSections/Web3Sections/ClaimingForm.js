@@ -17,18 +17,18 @@ class ClaimingForm extends Component{
     all:[],
     multiplier:1.2,
     isOwningLittleTraveler : false,
-    lTPercentageDiscount : 100
+    lTPercentageDiscount : 0,
   }
   constructor(props){
     super(props);
   }
 
-  componentDidMount(){
+  async componentDidMount(){
     var myChain = this.props.state.web3Settings.chains
       .filter(chain => chain.id === this.props.state.web3Settings.networkId);
     //var coin = myChain.map(chain => chain.options.coin)[0];
     this.setState({chain:myChain[0]});
-    this.fetchInitialInfo(true);
+    await this.fetchInitialInfo(true);
   }
 
   happyShalala(){
@@ -260,7 +260,11 @@ class ClaimingForm extends Component{
                 />
                 </Form.Field>
                 <Form.Field className={`${styles.content}`} >
-
+                {this.state.isOwningLittleTraveler ?
+                  <p>You are enjoying a {this.state.lTPercentageDiscount}% discount because you own a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a></p>
+                  :
+                <p>Get a ${this.state.lTPercentageDiscount}% discount on ticket price by purchasing a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a> first</p>
+              }
                 <h3>Upgrade to <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_airdrop}>AIRDROP TICKET</a>:</h3>
                 <div>Pay 20% extra (optional) to get airdrops of the speaker's projects tokens</div>
                   <Checkbox
@@ -273,10 +277,14 @@ class ClaimingForm extends Component{
                 <Form.Field>
                   <Message error header="Oops!">
                     {this.state.errorMessage}
-                    {this.state.adjustedPrice > this.props.state.web3Settings.ethBalance ?
+                    {this.state.adjustedPrice > this.props.state.web3Settings.ethBalance
+                      ?
                       <a className={`text-indigo-800 a__underline__secondary`}
                       target="_blank"
-                      href={this.state.chain.buy}> Buy ${this.state.chain.coin} here!</a>: <div></div>}
+                      href={this.state.chain.buy}> Buy ${this.state.chain.coin} here!</a>
+                      :
+                      <div></div>
+                    }
                   </Message>
                   <Message warning icon >
                     <Message.Content>

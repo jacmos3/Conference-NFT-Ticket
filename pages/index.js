@@ -27,7 +27,7 @@ class MyDapp extends Component {
         lnk_how_to_access:process.env.NEXT_PUBLIC_GEN_LNK_HOW_TO_ACCESS,
         lnk_spnsr_read_more:process.env.NEXT_PUBLIC_GEN_LNK_SPONSOR_READ_MORE,
         lnk_learn_more:process.env.NEXT_PUBLIC_GEN_LNK_LEARN_MORE,
-
+        lnk_littleTraveler:process.env.NEXT_PUBLIC_LNK_LITTLE_TRAVELER,
         web3Settings: {
             infura: process.env.NEXT_PUBLIC_WEB3SETTINGS_INFURA,
             isWeb3Connected: false,
@@ -50,7 +50,7 @@ class MyDapp extends Component {
                   marketCard:process.env.NEXT_PUBLIC_GOERLI_MARKETCARD,
                   coin:process.env.NEXT_PUBLIC_GOERLI_COIN,
                   buy:process.env.NEXT_PUBLIC_GOERLI_BUY,
-                  ltAddr:process.env.NEXT_PUBLIC_GOERLI_LITTLE_TRAVELER_ADDRESS
+                  ltAddr:process.env.NEXT_PUBLIC_GOERLI_LITTLE_TRAVELER_ADDRESS,
                 },
                 // {
                 //   name:process.env.NEXT_PUBLIC_GNOSIS_NAME,
