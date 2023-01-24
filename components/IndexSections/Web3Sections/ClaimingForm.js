@@ -123,7 +123,7 @@ class ClaimingForm extends Component{
           adjustedPrice = (this.state.isOwningLittleTraveler ? (adjustedPrice - (adjustedPrice * lTPercentageDiscount) / 100) : 1 * adjustedPrice).toFixed(18); //todo: check the LT discount adjustement by code
           if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
-            this.setState({totalSupply,adjustedPrice,loading: this.state.loading +1,
+            this.setState({totalSupply,adjustedPrice,lTPercentageDiscount, loading: this.state.loading +1,
               errorMessage:`Minting a ticket requires ${adjustedPrice} $${this.state.chain.coin}
               and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now.`});
             return false;
