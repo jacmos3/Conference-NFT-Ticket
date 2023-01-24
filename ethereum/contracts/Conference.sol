@@ -1344,7 +1344,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     event Paused(bool paused);
     event LittleTravelerDiscountChanged(uint256 value);
 
-    constructor() ERC721("Web3 In Travel NFT Ticket", "WEB3INTRAVEL") Ownable(){
+    constructor() ERC721("Web3 In Travel NFT Ticket - BCN 2023", "WEB3INTRAVEL") Ownable(){
         details[DET_TITLE] = "WEB3 IN TRAVEL - II Edition";
         details[DET_SUBTITLE] = "Helping the travel industry's transition to Web3";
         details[DET_CITY] = "Barcelona, Spain";
@@ -1360,8 +1360,8 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         sponsorshipPrice = INITIAL_SPONSOR_PRICE;
         price = INITIAL_PRICE;
         treasurer = 0xce73904422880604e78591fD6c758B0D5106dD50; //TripsCommunity address
-        littleTravelerAddress = 0x37CAB9F09a2FfA8C8650DD3De3594e1Cf2F38A84; //little traveler address on polygon
-        paused = false;
+        littleTravelerAddress = 0x37CAB9F09a2FfA8C8650DD3De3594e1Cf2F38A84; //little traveler address on polygon. Holders get a discount
+        paused = true;
         dateTime = 1693432800; //31 august 2023
         lTPercentageDiscount = 50; // it's 50%
     }
