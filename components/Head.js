@@ -23,7 +23,7 @@ function Head() {
         property="og:description"
         content="NFT ticket for -WEB3 IN TRAVEL- Summit. Barcelona, 15th of May 2023 The first travel summit dedicated to the transition to Web3. Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
-      <meta property="og:image" content="https://web3intravelnftbcn.web.app/meta.png" />
+      <meta property="og:image" content="https://barcelona.ticket.web3intravel.com/meta.png" />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
@@ -33,7 +33,7 @@ function Head() {
         property="twitter:description"
         content="NFT ticket for -WEB3 IN TRAVEL- Summit. Barcelona, 15th of May 2023 The first travel summit dedicated to the transition to Web3. Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
-      <meta property="twitter:image" content="https://web3intravelnftbcn.web.app/meta.png" />
+      <meta property="twitter:image" content="https://barcelona.ticket.web3intravel.com/meta.png" />
 
       {/* Font */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
