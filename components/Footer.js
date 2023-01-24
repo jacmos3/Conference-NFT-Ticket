@@ -18,7 +18,7 @@ class Footer extends Component {
                     </a>
                     On
                     <div className={`${styles__footer.img}`} >
-                      <a href="https://gnosischain.com"><img src="../img/gnosischain.png" alt="Gnosis chain" /></a>
+                      <a href="https://polygonscan.com/"><img src="../img/polygonchain.svg" alt="Gnosis chain" /></a>
                     </div>
                     <br />
                     <div>
