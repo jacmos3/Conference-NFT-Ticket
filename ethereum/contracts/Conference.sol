@@ -1497,7 +1497,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         parts[4] = string(abi.encodePacked('<text x="175" y="340" text-anchor="middle" class="f">',details[DET_CREDITS],'</text>',details[DET_LOGO],'</svg>'));
 
         string memory compact = string(abi.encodePacked(parts[0],parts[1],parts[2],parts[3],parts[4]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "Ticket #', toString(_tokenId), '", "description": "NFT ticket for -WEB3 IN TRAVEL- Summit. Barcelona, 15th of May 2022. The first travel summit dedicated to the transition to Web3. Speeches, panels and workshops to help the industry upgrade to the new internet.", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(compact)), '","attributes":[',metadata(_tokenId),']}'))));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "Ticket #', toString(_tokenId), '", "description": "NFT ticket for -WEB3 IN TRAVEL- Barcelona, 15th of May 2023. The first travel conference dedicated to the transition to Web3, 2nd edition. Speeches, panels and networking to help the industry upgrade to the new Web. https://web3intravel.com", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(compact)), '","attributes":[',metadata(_tokenId),']}'))));
 
         return string(abi.encodePacked('data:application/json;base64,', json));
     }
