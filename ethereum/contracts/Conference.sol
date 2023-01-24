@@ -1292,6 +1292,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     uint256 public constant INITIAL_SPONSOR_PRICE = 500000000 wei;
     uint256 private sumIncrement = 0;
     uint256 private dateTime;
+    uint256 public lTPercentageDiscount;
     uint256 public price;
     uint256 public sponsorshipPrice;
     uint256 public oldSponsorPayment;
@@ -1299,6 +1300,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     address public oldSponsorAddress;
     address public sponsorAddress;
     address public treasurer;
+    address public littleTravelerAddress;
     string constant private DET_LOGO = "Logo";
     string constant private DET_TITLE = "Title";
     string constant private DET_SUBTITLE = "Subtitle";
@@ -1325,6 +1327,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     string constant private ERR_INPUT_NOT_VALID = "Input not valid. Remove not valid chars";
     string constant private ERR_NO_HACKS_PLS = "Hack failed! Try again!";
     string constant private ERR_TIME_EXPIRED = "Time expired";
+    string constant private ERR_INSERT_1_100_VALUE = "Insert value between 1-100";
     mapping(string => string) private details;
     mapping(uint256 => uint256) public prices;
     mapping(uint256 => address) public mintedBy;
@@ -1337,7 +1340,9 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     event ExpirationChanged(uint256 dateTime, uint256 _dateTime);
     event Withdraw(address indexed owner, address indexed trasurer, uint256 amount);
     event NewTreasurer(address indexed oldTreasurer, address indexed newTreasurer);
+    event NewLittleTravelerAddress(address indexed oldLittleTravelerAddress, address indexed newLittleTravelerAddress);
     event Paused(bool paused);
+    event LittleTravelerDiscountChanged(uint256 value);
 
     constructor() ERC721("Web3 In Travel NFT Ticket", "WEB3INTRAVEL") Ownable(){
         details[DET_TITLE] = "WEB3 IN TRAVEL - II Edition";
@@ -1355,8 +1360,11 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         sponsorshipPrice = INITIAL_SPONSOR_PRICE;
         price = INITIAL_PRICE;
         treasurer = 0xce73904422880604e78591fD6c758B0D5106dD50; //TripsCommunity address
+        //littleTravelerAddress = 0x37CAB9F09a2FfA8C8650DD3De3594e1Cf2F38A84; //little traveler address on polygon
+        littleTravelerAddress = 0x4C153BFaD26628BdbaFECBCD160A0790b1b8F212; // test token
         paused = false;
         dateTime = 1693432800; //31 august 2023
+        lTPercentageDiscount = 50; // it's 50%
     }
 
     function claimByOwner() external onlyOwner {
@@ -1372,17 +1380,22 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function claimByPatrons(bool _airdrop) external payable nonReentrant {
         require(!paused, ERR_MINTING_PAUSED);
-        uint256 _tokenId = totalSupply() +1;
+        uint256 lTDiscount = 0;
+        if (littleTravelerAddress != address(0) && IERC721(littleTravelerAddress).balanceOf(_msgSender()) > 0){
+          lTDiscount = lTPercentageDiscount;
+        }
+
+        uint256 _tokenId = totalSupply() + 1;
         require(_tokenId <= MAX_ID, ERR_SOLD_OUT);
         require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
         address _sender = _msgSender();
         require(tx.origin == _sender, ERR_NO_HACKS_PLS);
         uint256 _msgValue = msg.value;
-        require(_airdrop ? _msgValue == (price + price / 5) : _msgValue == price, ERR_INSERT_EXACT);
+        require(_airdrop ? _msgValue == ((price + price / 5) - ((price + price / 5) * lTDiscount) / 100) : _msgValue == (price - (price * lTDiscount) / 100), ERR_INSERT_EXACT);
         prices[_tokenId] = _msgValue;
         mintedBy[_tokenId] = _sender;
         airdrop[_tokenId] = _airdrop;
-        sumIncrement += ((END_PRICE - INITIAL_PRICE) - sumIncrement)/10;
+        sumIncrement += ((END_PRICE - INITIAL_PRICE) - sumIncrement) / 10;
         price = INITIAL_PRICE + sumIncrement;
         emit Minting(_sender, _tokenId, _msgValue, _airdrop);
         _safeMint(_sender, _tokenId);
@@ -1524,6 +1537,11 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         treasurer = _newAddress;
     }
 
+    function setLittleTravelerAddress(address _newAddress) external onlyOwner{
+        emit NewLittleTravelerAddress(littleTravelerAddress, _newAddress);
+        littleTravelerAddress = _newAddress;
+    }
+
     function setSponsorQuote(string memory _quote) external onlyOwner{
       emit DetailChanged(DET_SPONSOR_QUOTE, details[DET_SPONSOR_QUOTE], _quote);
       emit DetailChanged(DET_SPONSOR_QUOTE_LONG, details[DET_SPONSOR_QUOTE_LONG], _quote);
@@ -1536,6 +1554,11 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         emit Paused(paused);
     }
 
+    function setLTPercentageDiscount(uint256 value) external onlyOwner{
+      require(value > 0 && value <= 100, ERR_INSERT_1_100_VALUE);
+      emit LittleTravelerDiscountChanged(value);
+      lTPercentageDiscount = value;
+    }
 
     function setDateTime(string memory _newDate, string memory _newDateLong, string memory _newTime, string memory _newTimeLong, uint256 _dateTime) external onlyOwner{
         if (bytes(_newDate).length > 0) {
