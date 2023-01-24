@@ -1287,12 +1287,12 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
 contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     bool public paused;
     uint16 public constant MAX_ID = 500;
-    uint256 public constant INITIAL_PRICE  = 25 ether;
-    uint256 public constant END_PRICE = 75 ether;
-    uint256 public constant INITIAL_SPONSOR_PRICE = 500 ether;
-    uint256 private constant EXP = 10**18;
+    uint256 public constant INITIAL_PRICE  = 79000000000000000000 wei;
+    uint256 public constant END_PRICE = 169000000000000000000 wei;
+    uint256 public constant INITIAL_SPONSOR_PRICE = 500000000000000000000 wei;
     uint256 private sumIncrement = 0;
     uint256 private dateTime;
+    uint256 public lTPercentageDiscount;
     uint256 public price;
     uint256 public sponsorshipPrice;
     uint256 public oldSponsorPayment;
@@ -1300,6 +1300,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     address public oldSponsorAddress;
     address public sponsorAddress;
     address public treasurer;
+    address public littleTravelerAddress;
     string constant private DET_LOGO = "Logo";
     string constant private DET_TITLE = "Title";
     string constant private DET_SUBTITLE = "Subtitle";
@@ -1326,6 +1327,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     string constant private ERR_INPUT_NOT_VALID = "Input not valid. Remove not valid chars";
     string constant private ERR_NO_HACKS_PLS = "Hack failed! Try again!";
     string constant private ERR_TIME_EXPIRED = "Time expired";
+    string constant private ERR_INSERT_1_100_VALUE = "Insert value between 1-100";
     mapping(string => string) private details;
     mapping(uint256 => uint256) public prices;
     mapping(uint256 => address) public mintedBy;
@@ -1338,26 +1340,30 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     event ExpirationChanged(uint256 dateTime, uint256 _dateTime);
     event Withdraw(address indexed owner, address indexed trasurer, uint256 amount);
     event NewTreasurer(address indexed oldTreasurer, address indexed newTreasurer);
+    event NewLittleTravelerAddress(address indexed oldLittleTravelerAddress, address indexed newLittleTravelerAddress);
     event Paused(bool paused);
+    event LittleTravelerDiscountChanged(uint256 value);
 
-    constructor() ERC721("Web3 In Travel NFT Ticket", "WEB3INTRAVEL") Ownable(){
-        details[DET_TITLE] = "WEB3 IN TRAVEL SUMMIT";
+    constructor() ERC721("Web3 In Travel NFT Ticket - BCN 2023", "WEB3INTRAVEL") Ownable(){
+        details[DET_TITLE] = "WEB3 IN TRAVEL - II Edition";
         details[DET_SUBTITLE] = "Helping the travel industry's transition to Web3";
-        details[DET_CITY] = "Porto, Portugal";
-        details[DET_DATE] = "14 SEPT 2022";
-        details[DET_DATE_LONG] = "14th of September 2022";
+        details[DET_CITY] = "Barcelona, Spain";
+        details[DET_DATE] = "15 MAY 2023";
+        details[DET_DATE_LONG] = "15th of May 2023";
         details[DET_TIME] = "10 am - 6 pm";
         details[DET_TIME_LONG] = "From 10 am to 6 pm";
         details[DET_SPONSOR_QUOTE] = "";
         details[DET_SPONSOR_QUOTE_LONG] = "";
-        details[DET_ADDRESS_LOCATION] = "EDIFICIO DA ALFANDEGA, R. Nova da Alfandega";
+        details[DET_ADDRESS_LOCATION] = "World Trade Center, Barcelona";
         details[DET_CREDITS] = "Web3InTravel.com by TripsCommunity in partnership with VRWS";
         details[DET_TYPE] = TYPE_STANDARD;
         sponsorshipPrice = INITIAL_SPONSOR_PRICE;
         price = INITIAL_PRICE;
         treasurer = 0xce73904422880604e78591fD6c758B0D5106dD50; //TripsCommunity address
+        littleTravelerAddress = 0x37CAB9F09a2FfA8C8650DD3De3594e1Cf2F38A84; //little traveler address on polygon. Holders get a discount
         paused = true;
-        dateTime = 1664582399; //30 september 23.59.59 UTC
+        dateTime = 1693432800; //31 august 2023
+        lTPercentageDiscount = 50; // it's 50%
     }
 
     function claimByOwner() external onlyOwner {
@@ -1373,20 +1379,30 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function claimByPatrons(bool _airdrop) external payable nonReentrant {
         require(!paused, ERR_MINTING_PAUSED);
-        uint256 _tokenId = totalSupply() +1;
+        uint256 _tokenId = totalSupply() + 1;
         require(_tokenId <= MAX_ID, ERR_SOLD_OUT);
         require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
         address _sender = _msgSender();
         require(tx.origin == _sender, ERR_NO_HACKS_PLS);
         uint256 _msgValue = msg.value;
-        require(_airdrop ? _msgValue == (price + price / 5) : _msgValue == price, ERR_INSERT_EXACT);
+        require(_msgValue == expectedAmount(_airdrop), ERR_INSERT_EXACT);
         prices[_tokenId] = _msgValue;
         mintedBy[_tokenId] = _sender;
         airdrop[_tokenId] = _airdrop;
-        sumIncrement += ((END_PRICE - INITIAL_PRICE) - sumIncrement)/10;
-        price = INITIAL_PRICE + (sumIncrement / EXP)*EXP;
+        sumIncrement += ((END_PRICE - INITIAL_PRICE) - sumIncrement) / 10;
+        price = INITIAL_PRICE + sumIncrement;
         emit Minting(_sender, _tokenId, _msgValue, _airdrop);
         _safeMint(_sender, _tokenId);
+    }
+
+    //frontend and users can call it to check how much they should pay for the next ticket.
+    //Notice: this is only informal, since value may change if other users mint in the meanwhile
+    function expectedAmount(bool _airdrop) view public returns (uint256){
+        uint256 lTDiscount = 0;
+        if (userOwnsLittleTraveler()){
+          lTDiscount = lTPercentageDiscount;
+        }
+        return _airdrop ? (price + price / 5) - ((price + price / 5) * lTDiscount) / 100 : price - (price * lTDiscount) / 100;
     }
 
     function sponsorship(string memory _quote) external payable nonReentrant {
@@ -1413,19 +1429,75 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         emit NewSponsorship(_sender, sponsorPayment, _quote);
     }
 
+    function getSlice(uint end, string memory inputString) public pure returns (string memory) {
+        bytes memory myBytes = bytes(inputString);
+        bytes memory extractedBytes = new bytes(end + 1);
+        uint index = 0;
+
+        for (uint i = 0; i < end; i++) {
+            if (myBytes[i] != 0x00){
+                extractedBytes[index] = myBytes[i];
+            }
+            else{
+                extractedBytes[index] = 0x30;
+            }
+            index++;
+        }
+        extractedBytes[end] = 0x30;
+        return string(extractedBytes);
+    }
+
+
+    function countTrailingZeros(string memory inputString) internal pure returns (uint) {
+        bytes memory myBytes = bytes(inputString);
+        uint count = 0;
+        for (uint256 i = myBytes.length - 1; i >= 0; i--) {
+            if (myBytes[i] == 0x30) {
+                count++;
+            } else {
+                break;
+            }
+        }
+        return count;
+    }
+
+    function trim(string memory priceRight) internal pure returns (string memory){
+        uint index = 18 - countTrailingZeros(priceRight);
+        if(index > bytes(priceRight).length) {
+            return priceRight;
+        }
+        return getSlice(index, priceRight);
+    }
+
+    function composePriceToDisplay(uint256 _price) public pure returns (string memory){
+        if (_price == 0)
+            return "0.0";
+
+        string memory priceLeft = string(abi.encodePacked(toString(_price / 1 ether)));
+        string memory priceRight = string(abi.encodePacked(toString(_price % 1 ether)));
+        uint256 len = 18 - bytes(priceRight).length;
+        uint256 l = 0;
+         while (l < len) {
+            priceRight = string(abi.encodePacked("0",priceRight));
+            l++;
+        }
+
+        return string(abi.encodePacked(priceLeft,'.',trim(priceRight)));
+    }
+
     function tokenURI(uint256 _tokenId) override public view returns (string memory) {
         require(_tokenId <= totalSupply(), ERR_NOT_EXISTS);
-        string memory _details_type = airdrop[_tokenId] ? TYPE_AIRDROP : TYPE_STANDARD;
         string memory _details_ticket_number = string(abi.encodePacked(DET_TICKET_NUMBER,toString(_tokenId)));
+
         string[5] memory parts;
-        parts[0] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.a { fill:white; font-family: serif; font-size: 20px; } .a1 { fill:white; font-family: serif; font-size: 16px; } .b { fill:white; font-family: serif; font-size: 14px; } .c { fill:white; font-family: serif; font-size: 8px; }</style> <rect width="100%" height="100%" fill="#467494" />'));
-        parts[1] = string(abi.encodePacked('<text class="a" x="175" y="40"  text-anchor="middle" >',details[DET_TITLE],'</text><text class="a1" x="175" y="60"  text-anchor="middle" >',details[DET_SUBTITLE],'</text><text x="175" y="90" text-anchor="middle" class="a1">',_details_ticket_number,'</text>'));
-        parts[2] = string(abi.encodePacked('<text x="10" y="110" class="b">',details[DET_CITY],'</text><text x="10" y="130" class="b">',details[DET_ADDRESS_LOCATION],'</text><text x="10" y="150" class="b">',details[DET_DATE_LONG],'</text><text x="10" y="170" class="b">',details[DET_TIME_LONG],'</text>'));
-        parts[3] = string(abi.encodePacked('<text x="10" y="190" class="b">$',toString(prices[_tokenId] / EXP),' xDAI</text><text x="10" y="210" class="b">0x',toAsciiString(mintedBy[_tokenId]),'</text><text x="10" y="230" class="b">',_details_type,'</text>'));
-        parts[4] = string(abi.encodePacked('<text x="175" y="250" class="b" text-anchor="middle" >',details[DET_SPONSOR_QUOTE_LONG],'</text><text x="175" y="330" text-anchor="middle" class="c">',details[DET_CREDITS],'</text>',details[DET_LOGO],'</svg>'));
+        parts[0] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.a { fill:white; font: bold 20px sans-serif; } .b { fill:white; font: 12px sans-serif; } .c { fill:white; font: bold 16px sans-serif; } .d { fill:white; font: bold 14px sans-serif; } .e { fill:white; font: 12px sans-serif; } .f { fill:white; font: 8px sans-serif; }</style> <rect width="100%" height="100%" fill="#4285f4" />'));
+        parts[1] = string(abi.encodePacked('<text class="a" x="175" y="40"  text-anchor="middle" >',details[DET_TITLE],'</text><text class="b" x="175" y="60"  text-anchor="middle" >',details[DET_SUBTITLE],'</text><text x="175" y="90" text-anchor="middle" class="c">NFT TICKET ',_details_ticket_number,'</text>'));
+        parts[2] = string(abi.encodePacked('<text x="175" y="130" text-anchor="middle" class="d">',details[DET_ADDRESS_LOCATION],'</text><text x="175" y="150" text-anchor="middle" class="d">',details[DET_DATE_LONG],' (',details[DET_TIME],')</text><text x="175" y="190" class="d" text-anchor="middle" >',details[DET_SPONSOR_QUOTE_LONG],'</text>'));
+        parts[3] = string(abi.encodePacked('<text x="175" y="230" text-anchor="middle" class="d">Dynamic price: $ETH ',composePriceToDisplay(prices[_tokenId]),'</text><text x="175" y="305" text-anchor="middle" class="e">minted by:</text><text x="175" y="320" text-anchor="middle" class="e">0x',toAsciiString(mintedBy[_tokenId]),'</text>'));
+        parts[4] = string(abi.encodePacked('<text x="175" y="340" text-anchor="middle" class="f">',details[DET_CREDITS],'</text>',details[DET_LOGO],'</svg>'));
 
         string memory compact = string(abi.encodePacked(parts[0],parts[1],parts[2],parts[3],parts[4]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "Ticket #', toString(_tokenId), '", "description": "NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022. The first travel summit dedicated to the transition to Web3. Speeches, panels and workshops to help the industry upgrade to the new internet.", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(compact)), '","attributes":[',metadata(_tokenId),']}'))));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "Ticket #', toString(_tokenId), '", "description": "NFT ticket for -WEB3 IN TRAVEL- Barcelona, 15th of May 2023. The first travel conference dedicated to the transition to Web3, 2nd edition. Speeches, panels and networking to help the industry upgrade to the new Web. https://web3intravel.com", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(compact)), '","attributes":[',metadata(_tokenId),']}'))));
 
         return string(abi.encodePacked('data:application/json;base64,', json));
     }
@@ -1469,6 +1541,11 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         treasurer = _newAddress;
     }
 
+    function setLittleTravelerAddress(address _newAddress) external onlyOwner{
+        emit NewLittleTravelerAddress(littleTravelerAddress, _newAddress);
+        littleTravelerAddress = _newAddress;
+    }
+
     function setSponsorQuote(string memory _quote) external onlyOwner{
       emit DetailChanged(DET_SPONSOR_QUOTE, details[DET_SPONSOR_QUOTE], _quote);
       emit DetailChanged(DET_SPONSOR_QUOTE_LONG, details[DET_SPONSOR_QUOTE_LONG], _quote);
@@ -1481,6 +1558,11 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         emit Paused(paused);
     }
 
+    function setLTPercentageDiscount(uint256 value) external onlyOwner{
+      require(value > 0 && value <= 100, ERR_INSERT_1_100_VALUE);
+      emit LittleTravelerDiscountChanged(value);
+      lTPercentageDiscount = value;
+    }
 
     function setDateTime(string memory _newDate, string memory _newDateLong, string memory _newTime, string memory _newTimeLong, uint256 _dateTime) external onlyOwner{
         if (bytes(_newDate).length > 0) {
@@ -1528,6 +1610,10 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     function setSubtitle(string memory _newSubtitle) external onlyOwner{
         emit DetailChanged(DET_SUBTITLE, details[DET_SUBTITLE], _newSubtitle);
         details[DET_SUBTITLE] = _newSubtitle;
+    }
+
+    function userOwnsLittleTraveler() view public returns (bool) {
+        return littleTravelerAddress != address(0) && IERC721(littleTravelerAddress).balanceOf(_msgSender()) > 0;
     }
 
     function sanitize(string memory input) internal pure returns(bool){

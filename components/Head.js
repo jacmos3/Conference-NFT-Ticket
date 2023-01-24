@@ -12,7 +12,7 @@ function Head() {
       <meta name="title" content="Web3 in Travel NFT Tickets" />
       <meta
         name="description"
-        content="NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022 The first travel summit dedicated to the transition to Web3.Speeches, panels and workshops to help the industry upgrade to the new internet."
+        content="NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 15th of May 2023 The first travel summit dedicated to the transition to Web3. Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
 
       {/* OG + Facebook */}
@@ -21,9 +21,9 @@ function Head() {
       <meta property="og:title" content="Web3 in Travel NFT Tickets" />
       <meta
         property="og:description"
-        content="NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022 The first travel summit dedicated to the transition to Web3.Speeches, panels and workshops to help the industry upgrade to the new internet."
+        content="NFT ticket for -WEB3 IN TRAVEL- Summit. Barcelona, 15th of May 2023 The first travel summit dedicated to the transition to Web3. Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
-      <meta property="og:image" content="www.ticket.web3intravel.com/meta.png" />
+      <meta property="og:image" content="https://barcelona.ticket.web3intravel.com/meta.png" />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
@@ -31,9 +31,9 @@ function Head() {
       <meta property="twitter:title" content="Web3 in Travel NFT Tickets" />
       <meta
         property="twitter:description"
-        content="NFT ticket for -WEB3 IN TRAVEL- Summit. Porto, 14th of September 2022 The first travel summit dedicated to the transition to Web3.Speeches, panels and workshops to help the industry upgrade to the new internet."
+        content="NFT ticket for -WEB3 IN TRAVEL- Summit. Barcelona, 15th of May 2023 The first travel summit dedicated to the transition to Web3. Speeches, panels and workshops to help the industry upgrade to the new internet."
       />
-      <meta property="twitter:image" content="https://www.ticket.web3intravel.com/meta.png" />
+      <meta property="twitter:image" content="https://barcelona.ticket.web3intravel.com/meta.png" />
 
       {/* Font */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />

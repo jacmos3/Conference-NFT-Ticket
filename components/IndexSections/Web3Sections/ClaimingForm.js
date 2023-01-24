@@ -15,18 +15,27 @@ class ClaimingForm extends Component{
     checked:true,
     buttonLabel: "Mint",
     all:[],
-    multiplier:1.2
+    multiplier:1.2,
+    isOwningLittleTraveler : false,
+    lTPercentageDiscount : 0,
+    usdPrice:0
   }
   constructor(props){
     super(props);
   }
 
-  componentDidMount(){
+  async componentDidMount(){
     var myChain = this.props.state.web3Settings.chains
       .filter(chain => chain.id === this.props.state.web3Settings.networkId);
     //var coin = myChain.map(chain => chain.options.coin)[0];
     this.setState({chain:myChain[0]});
-    this.fetchInitialInfo(true);
+    await this.fetchInitialInfo(true);
+    const coingeckoPrice = await fetch(
+     'https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd'
+    );
+    const data = await coingeckoPrice.json();
+    this.setState({ usdPrice: data["matic-network"].usd });
+
   }
 
   happyShalala(){
@@ -67,13 +76,34 @@ class ClaimingForm extends Component{
     });
   }
 
+  async isOwningLittleTraveler(){
+    console.log("is owning little traveler?");
+    try{
+      const accounts= await this.props.state.web3.eth.getAccounts();
+      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.ltAddr);
+      let lastUserIndex = await instance.methods.balanceOf(accounts[0]).call()
+      .then((result) =>{
+          return JSON.parse(result);
+      })
+      .catch((error) =>{
+        console.log(error);
+      });
+
+      this.setState({isOwningLittleTraveler: lastUserIndex > 0 ? true : false});
+      console.log(lastUserIndex);
+    }catch(err){
+      this.setState({errorMessage: err.message});
+    }
+  }
+
   async fetchInitialInfo(firstFetch) {
       console.log("start initial Info");
       this.setState({checked:false,loading: this.state.loading +1, errorMessage: '',successMessage:''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr);
-
+          let lTPercentageDiscount = await instance.methods.lTPercentageDiscount().call();
+          console.log("percentage: "+lTPercentageDiscount);
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
@@ -93,18 +123,21 @@ class ClaimingForm extends Component{
           if (firstFetch){
             this.fetchNFTList();
           }
-          
-          let adjustedPrice = parseInt(this.props.state.web3.utils.fromWei(await instance.methods.price().call())).toFixed(2);
+
+          let adjustedPrice = this.props.state.web3.utils.fromWei(await instance.methods.price().call());
+          await this.isOwningLittleTraveler();
+          console.log(this.state.isOwningLittleTraveler ? "YES" : "NO");
+          adjustedPrice = (this.state.isOwningLittleTraveler ? (adjustedPrice - (adjustedPrice * lTPercentageDiscount) / 100) : 1 * adjustedPrice).toFixed(18); //todo: check the LT discount adjustement by code
           if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
-            this.setState({totalSupply,adjustedPrice,loading: this.state.loading +1,
+            this.setState({totalSupply,adjustedPrice,lTPercentageDiscount, loading: this.state.loading +1,
               errorMessage:`Minting a ticket requires ${adjustedPrice} $${this.state.chain.coin}
               and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now.`});
             return false;
           }
 
           //console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + price + " " + paused);
-          this.setState({totalSupply,maxSupply,adjustedPrice,loading: this.state.loading -1, errorMessage: ""});
+          this.setState({totalSupply,maxSupply,adjustedPrice, lTPercentageDiscount, loading: this.state.loading -1, errorMessage: ""});
           console.log("end try Info - success");
 
           return adjustedPrice;
@@ -203,7 +236,8 @@ class ClaimingForm extends Component{
       return;
     }
     console.log("cheked: " + checked);
-    var adjustedPrice = checked ? (this.state.adjustedPrice * this.state.multiplier).toFixed(2) : (this.state.adjustedPrice / this.state.multiplier).toFixed(2);
+    var adjustedPrice = (checked ? this.state.adjustedPrice * this.state.multiplier : this.state.adjustedPrice / this.state.multiplier).toFixed(18);
+
     var errorMessage = "";
     if (adjustedPrice > this.props.state.web3Settings.ethBalance){
       console.log("You do not have enough money");
@@ -231,9 +265,15 @@ class ClaimingForm extends Component{
                   readOnly
                   value = {this.state.adjustedPrice}
                 />
+                <h4>${(this.state.adjustedPrice * this.state.usdPrice).toFixed(2) } at the real time rate of ${this.state.usdPrice} per {this.state.chain.coin}</h4>
                 </Form.Field>
                 <Form.Field className={`${styles.content}`} >
-
+                <h4>NOTE:</h4>
+                {this.state.isOwningLittleTraveler ?
+                  <p>You are enjoying a {this.state.lTPercentageDiscount}% discount because you own a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a></p>
+                  :
+                  <p>Get a {this.state.lTPercentageDiscount}% discount on ticket price by purchasing a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a> first</p>
+                }
                 <h3>Upgrade to <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_airdrop}>AIRDROP TICKET</a>:</h3>
                 <div>Pay 20% extra (optional) to get airdrops of the speaker's projects tokens</div>
                   <Checkbox
@@ -246,10 +286,14 @@ class ClaimingForm extends Component{
                 <Form.Field>
                   <Message error header="Oops!">
                     {this.state.errorMessage}
-                    {this.state.adjustedPrice > this.props.state.web3Settings.ethBalance ?
+                    {this.state.adjustedPrice > this.props.state.web3Settings.ethBalance
+                      ?
                       <a className={`text-indigo-800 a__underline__secondary`}
                       target="_blank"
-                      href={this.state.chain.buy}> Buy ${this.state.chain.coin} here!</a>: <div></div>}
+                      href={this.state.chain.buy}> Buy ${this.state.chain.coin} here!</a>
+                      :
+                      <div></div>
+                    }
                   </Message>
                   <Message warning icon >
                     <Message.Content>
