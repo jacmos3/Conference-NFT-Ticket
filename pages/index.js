@@ -49,7 +49,8 @@ class MyDapp extends Component {
                   marketplace:process.env.NEXT_PUBLIC_GOERLI_MARKETPLACE,
                   marketCard:process.env.NEXT_PUBLIC_GOERLI_MARKETCARD,
                   coin:process.env.NEXT_PUBLIC_GOERLI_COIN,
-                  buy:process.env.NEXT_PUBLIC_GOERLI_BUY
+                  buy:process.env.NEXT_PUBLIC_GOERLI_BUY,
+                  ltAddr:process.env.NEXT_PUBLIC_GOERLI_LITTLE_TRAVELER_ADDRESS
                 },
                 // {
                 //   name:process.env.NEXT_PUBLIC_GNOSIS_NAME,

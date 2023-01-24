@@ -15,7 +15,9 @@ class ClaimingForm extends Component{
     checked:true,
     buttonLabel: "Mint",
     all:[],
-    multiplier:1.2
+    multiplier:1.2,
+    isOwningLittleTraveler : false,
+    lTPercentageDiscount : 100
   }
   constructor(props){
     super(props);
@@ -67,13 +69,34 @@ class ClaimingForm extends Component{
     });
   }
 
+  async isOwningLittleTraveler(){
+    console.log("is owning little traveler?");
+    try{
+      const accounts= await this.props.state.web3.eth.getAccounts();
+      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.ltAddr);
+      let lastUserIndex = await instance.methods.balanceOf(accounts[0]).call()
+      .then((result) =>{
+          return JSON.parse(result);
+      })
+      .catch((error) =>{
+        console.log(error);
+      });
+
+      this.setState({isOwningLittleTraveler: lastUserIndex > 0 ? true : false});
+      console.log(lastUserIndex);
+    }catch(err){
+      this.setState({errorMessage: err.message});
+    }
+  }
+
   async fetchInitialInfo(firstFetch) {
       console.log("start initial Info");
       this.setState({checked:false,loading: this.state.loading +1, errorMessage: '',successMessage:''});
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr);
-
+          let lTPercentageDiscount = await instance.methods.lTPercentageDiscount().call();
+          console.log("percentage: "+lTPercentageDiscount);
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
@@ -95,6 +118,9 @@ class ClaimingForm extends Component{
           }
 
           let adjustedPrice = this.props.state.web3.utils.fromWei(await instance.methods.price().call());
+          await this.isOwningLittleTraveler();
+          console.log(this.state.isOwningLittleTraveler ? "YES" : "NO");
+          adjustedPrice = (this.state.isOwningLittleTraveler ? (adjustedPrice - (adjustedPrice * lTPercentageDiscount) / 100) : 1 * adjustedPrice).toFixed(18); //todo: check the LT discount adjustement by code
           if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
             this.setState({totalSupply,adjustedPrice,loading: this.state.loading +1,
@@ -104,7 +130,7 @@ class ClaimingForm extends Component{
           }
 
           //console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + price + " " + paused);
-          this.setState({totalSupply,maxSupply,adjustedPrice,loading: this.state.loading -1, errorMessage: ""});
+          this.setState({totalSupply,maxSupply,adjustedPrice, lTPercentageDiscount, loading: this.state.loading -1, errorMessage: ""});
           console.log("end try Info - success");
 
           return adjustedPrice;

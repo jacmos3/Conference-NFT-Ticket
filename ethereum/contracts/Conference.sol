@@ -1380,18 +1380,13 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function claimByPatrons(bool _airdrop) external payable nonReentrant {
         require(!paused, ERR_MINTING_PAUSED);
-        uint256 lTDiscount = 0;
-        if (littleTravelerAddress != address(0) && IERC721(littleTravelerAddress).balanceOf(_msgSender()) > 0){
-          lTDiscount = lTPercentageDiscount;
-        }
-
         uint256 _tokenId = totalSupply() + 1;
         require(_tokenId <= MAX_ID, ERR_SOLD_OUT);
         require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
         address _sender = _msgSender();
         require(tx.origin == _sender, ERR_NO_HACKS_PLS);
         uint256 _msgValue = msg.value;
-        require(_airdrop ? _msgValue == ((price + price / 5) - ((price + price / 5) * lTDiscount) / 100) : _msgValue == (price - (price * lTDiscount) / 100), ERR_INSERT_EXACT);
+        require(_msgValue == expectedAmount(_airdrop), ERR_INSERT_EXACT);
         prices[_tokenId] = _msgValue;
         mintedBy[_tokenId] = _sender;
         airdrop[_tokenId] = _airdrop;
@@ -1399,6 +1394,16 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         price = INITIAL_PRICE + sumIncrement;
         emit Minting(_sender, _tokenId, _msgValue, _airdrop);
         _safeMint(_sender, _tokenId);
+    }
+
+    //frontend and users can call it to check how much they should pay for the next ticket.
+    //Notice: this is only informal, since value may change if other users mint in the meanwhile
+    function expectedAmount(bool _airdrop) view public returns (uint256){
+        uint256 lTDiscount = 0;
+        if (userOwnsLittleTraveler()){
+          lTDiscount = lTPercentageDiscount;
+        }
+        return _airdrop ? (price + price / 5) - ((price + price / 5) * lTDiscount) / 100 : price - (price * lTDiscount) / 100;
     }
 
     function sponsorship(string memory _quote) external payable nonReentrant {
@@ -1606,6 +1611,10 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     function setSubtitle(string memory _newSubtitle) external onlyOwner{
         emit DetailChanged(DET_SUBTITLE, details[DET_SUBTITLE], _newSubtitle);
         details[DET_SUBTITLE] = _newSubtitle;
+    }
+
+    function userOwnsLittleTraveler() view public returns (bool) {
+        return littleTravelerAddress != address(0) && IERC721(littleTravelerAddress).balanceOf(_msgSender()) > 0;
     }
 
     function sanitize(string memory input) internal pure returns(bool){
