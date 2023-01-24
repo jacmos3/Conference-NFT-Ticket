@@ -263,7 +263,7 @@ class ClaimingForm extends Component{
                 {this.state.isOwningLittleTraveler ?
                   <p>You are enjoying a {this.state.lTPercentageDiscount}% discount because you own a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a></p>
                   :
-                <p>Get a ${this.state.lTPercentageDiscount}% discount on ticket price by purchasing a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a> first</p>
+                <p>Get a {this.state.lTPercentageDiscount}% discount on ticket price by purchasing a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}>Little Traveler NFT</a> first</p>
               }
                 <h3>Upgrade to <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_airdrop}>AIRDROP TICKET</a>:</h3>
                 <div>Pay 20% extra (optional) to get airdrops of the speaker's projects tokens</div>
