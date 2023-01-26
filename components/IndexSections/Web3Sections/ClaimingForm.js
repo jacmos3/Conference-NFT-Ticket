@@ -18,7 +18,8 @@ class ClaimingForm extends Component{
     multiplier:1.2,
     isOwningLittleTraveler : false,
     lTPercentageDiscount : 0,
-    usdPrice:0
+    usdPrice:0,
+    priceBeforeDiscount:0
   }
   constructor(props){
     super(props);
@@ -124,20 +125,20 @@ class ClaimingForm extends Component{
             this.fetchNFTList();
           }
 
-          let adjustedPrice = this.props.state.web3.utils.fromWei(await instance.methods.price().call());
+          let priceBeforeDiscount = this.props.state.web3.utils.fromWei(await instance.methods.price().call());
           await this.isOwningLittleTraveler();
-          console.log(this.state.isOwningLittleTraveler ? "YES" : "NO");
-          adjustedPrice = (this.state.isOwningLittleTraveler ? (adjustedPrice - (adjustedPrice * lTPercentageDiscount) / 100) : 1 * adjustedPrice).toFixed(18); //todo: check the LT discount adjustement by code
+
+          let adjustedPrice = (this.state.isOwningLittleTraveler ? (priceBeforeDiscount - (priceBeforeDiscount * lTPercentageDiscount) / 100) : 1 * priceBeforeDiscount).toFixed(18);
           if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
-            this.setState({totalSupply,adjustedPrice,lTPercentageDiscount, loading: this.state.loading +1,
+            this.setState({totalSupply,adjustedPrice,lTPercentageDiscount, priceBeforeDiscount, loading: this.state.loading +1,
               errorMessage:`Minting a ticket requires ${adjustedPrice} $${this.state.chain.coin}
               and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now.`});
             return false;
           }
 
           //console.log("info retrieved, result: " + totalSupply + " " + maxSupply + " " + price + " " + paused);
-          this.setState({totalSupply,maxSupply,adjustedPrice, lTPercentageDiscount, loading: this.state.loading -1, errorMessage: ""});
+          this.setState({totalSupply,priceBeforeDiscount,maxSupply,adjustedPrice, lTPercentageDiscount, loading: this.state.loading -1, errorMessage: ""});
           console.log("end try Info - success");
 
           return adjustedPrice;
@@ -256,12 +257,12 @@ class ClaimingForm extends Component{
       <br />
           <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
                 <Form.Field>
-                <h3>Next ticket cost:</h3>
+                <h3>Next ticket cost: ${this.state.chain.coin} {(1 * this.state.priceBeforeDiscount).toFixed(18)}</h3>
                 <div className={`${styles.marginBottom}`} >The price increases following a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_bondingCurve}>bonding curve</a>.</div>
                 <Input
                   label={{ basic: true, content: this.state.chain.coin, id:"inputLabel" }}
                   labelPosition='right'
-                  placeholder='Matic amount'
+                  placeholder={`${this.state.chain.coin} amount`}
                   readOnly
                   value = {this.state.adjustedPrice}
                 />
@@ -271,13 +272,13 @@ class ClaimingForm extends Component{
                 <h4>NOTE:</h4>
                 {this.state.isOwningLittleTraveler ?
                   <p className="">You are enjoying a {this.state.lTPercentageDiscount}% discount because you own a
-                    <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}> Little Traveler NFT
-                    <img src = "../../lt.png" alt = "Little Traveler Collection"/></a>
+                    <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}> Little Traveler NFT</a>
+                    <a target="_blank" href={this.props.state.lnk_littleTraveler}><img src = "../../lt.png" alt = "Little Traveler Collection"/></a>
                   </p>
                   :
                   <p>Get a {this.state.lTPercentageDiscount}% discount on ticket price by purchasing a
                     <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}> Little Traveler NFT</a> first
-                      <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_littleTraveler}><img src = "../../lt.png" alt = "Little Traveler Collection"/></a>
+                      <a target="_blank" href={this.props.state.lnk_littleTraveler}><img src = "../../lt.png" alt = "Little Traveler Collection"/></a>
                   </p>
                 }
                 <h3>Upgrade to <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_airdrop}>AIRDROP TICKET</a>:</h3>
