@@ -18,7 +18,8 @@ class SponsorshipForm extends Component{
     buttonLabel: "Sponsor!",
     sponsorQuote:"",
     element:{image:"",header:""},
-    all:[]
+    all:[],
+    usdPrice:0
   }
   constructor(props){
     super(props);
@@ -31,6 +32,11 @@ class SponsorshipForm extends Component{
     const accounts= await this.props.state.web3.eth.getAccounts();
     this.setState({chain:myChain[0], account:accounts[0]});
     this.fetchInitialInfo();
+    const coingeckoPrice = await fetch(
+     'https://api.coingecko.com/api/v3/simple/price?ids=matic-network&vs_currencies=usd'
+    );
+    const data = await coingeckoPrice.json();
+    this.setState({ usdPrice: data["matic-network"].usd });
   }
 
   happyShalala(){
@@ -262,6 +268,7 @@ render(){
               <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} className= {`${styles.form}`}>
                     <Form.Field>
                     <h3 className="text-center">Sponsorship price: ${this.state.sponsorPrice} {this.state.chain.coin}</h3>
+                    <p className="text-center">which is ${(this.state.sponsorPrice * this.state.usdPrice).toFixed(2) } at the real time rate of ${this.state.usdPrice} per {this.state.chain.coin}</p>
                     {this.state.currentSponsor != 0
                       ? <h4 className="text-center">(Previous sponsor paid: ${this.state.currentSponsor} {this.state.chain.coin})</h4>
                       : <div></div>

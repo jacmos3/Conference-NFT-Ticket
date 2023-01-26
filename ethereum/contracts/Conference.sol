@@ -1355,7 +1355,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         details[DET_SPONSOR_QUOTE] = "";
         details[DET_SPONSOR_QUOTE_LONG] = "";
         details[DET_ADDRESS_LOCATION] = "World Trade Center, Barcelona";
-        details[DET_CREDITS] = "Web3InTravel.com by TripsCommunity in partnership with VRWS";
+        details[DET_CREDITS] = "Web3InTravel.com by Web3 in Travel DAO";
         details[DET_TYPE] = TYPE_STANDARD;
         sponsorshipPrice = INITIAL_SPONSOR_PRICE;
         price = INITIAL_PRICE;
@@ -1493,7 +1493,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         parts[0] = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.a { fill:white; font: bold 20px sans-serif; } .b { fill:white; font: 12px sans-serif; } .c { fill:white; font: bold 16px sans-serif; } .d { fill:white; font: bold 14px sans-serif; } .e { fill:white; font: 12px sans-serif; } .f { fill:white; font: 8px sans-serif; }</style> <rect width="100%" height="100%" fill="#4285f4" />'));
         parts[1] = string(abi.encodePacked('<text class="a" x="175" y="40"  text-anchor="middle" >',details[DET_TITLE],'</text><text class="b" x="175" y="60"  text-anchor="middle" >',details[DET_SUBTITLE],'</text><text x="175" y="90" text-anchor="middle" class="c">NFT TICKET ',_details_ticket_number,'</text>'));
         parts[2] = string(abi.encodePacked('<text x="175" y="130" text-anchor="middle" class="d">',details[DET_ADDRESS_LOCATION],'</text><text x="175" y="150" text-anchor="middle" class="d">',details[DET_DATE_LONG],' (',details[DET_TIME],')</text><text x="175" y="190" class="d" text-anchor="middle" >',details[DET_SPONSOR_QUOTE_LONG],'</text>'));
-        parts[3] = string(abi.encodePacked('<text x="175" y="230" text-anchor="middle" class="d">Dynamic price: $ETH ',composePriceToDisplay(prices[_tokenId]),'</text><text x="175" y="305" text-anchor="middle" class="e">minted by:</text><text x="175" y="320" text-anchor="middle" class="e">0x',toAsciiString(mintedBy[_tokenId]),'</text>'));
+        parts[3] = string(abi.encodePacked('<text x="175" y="230" text-anchor="middle" class="d">Dynamic price: $MATIC ',composePriceToDisplay(prices[_tokenId]),'</text><text x="175" y="305" text-anchor="middle" class="e">minted by:</text><text x="175" y="320" text-anchor="middle" class="e">0x',toAsciiString(mintedBy[_tokenId]),'</text>'));
         parts[4] = string(abi.encodePacked('<text x="175" y="340" text-anchor="middle" class="f">',details[DET_CREDITS],'</text>',details[DET_LOGO],'</svg>'));
 
         string memory compact = string(abi.encodePacked(parts[0],parts[1],parts[2],parts[3],parts[4]));
