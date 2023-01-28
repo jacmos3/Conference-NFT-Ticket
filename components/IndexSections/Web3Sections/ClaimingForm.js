@@ -128,7 +128,7 @@ class ClaimingForm extends Component{
           let priceBeforeDiscount = this.props.state.web3.utils.fromWei(await instance.methods.price().call());
           await this.isOwningLittleTraveler();
 
-          let adjustedPrice = (this.state.isOwningLittleTraveler ? (priceBeforeDiscount - (priceBeforeDiscount * lTPercentageDiscount) / 100) : 1 * priceBeforeDiscount).toFixed(18);
+          let adjustedPrice = (this.state.isOwningLittleTraveler ? (priceBeforeDiscount - (priceBeforeDiscount * lTPercentageDiscount) / 100) : 1 * priceBeforeDiscount).toFixed(6);
           if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
             this.setState({totalSupply,adjustedPrice,lTPercentageDiscount, priceBeforeDiscount, loading: this.state.loading +1,
@@ -237,7 +237,7 @@ class ClaimingForm extends Component{
       return;
     }
     console.log("cheked: " + checked);
-    var adjustedPrice = (checked ? this.state.adjustedPrice * this.state.multiplier : this.state.adjustedPrice / this.state.multiplier).toFixed(18);
+    var adjustedPrice = (checked ? this.state.adjustedPrice * this.state.multiplier : this.state.adjustedPrice / this.state.multiplier).toFixed(6);
 
     var errorMessage = "";
     if (adjustedPrice > this.props.state.web3Settings.ethBalance){
@@ -257,7 +257,7 @@ class ClaimingForm extends Component{
       <br />
           <Form error={!!this.state.errorMessage} warning={!!this.state.warningMessage} success={!!this.state.successMessage} className= {`${styles.form}`}>
                 <Form.Field>
-                <h3>Next ticket cost: ${this.state.chain.coin} {(1 * this.state.priceBeforeDiscount).toFixed(18)}</h3>
+                <h3>Next ticket cost: ${this.state.chain.coin} {(1 * this.state.priceBeforeDiscount).toFixed(6)}</h3>
                 <div className={`${styles.marginBottom}`} >The price increases following a <a className={`a__underline__primary`} target="_blank" href={this.props.state.lnk_bondingCurve}>bonding curve</a>.</div>
                 <Input
                   label={{ basic: true, content: this.state.chain.coin, id:"inputLabel" }}
