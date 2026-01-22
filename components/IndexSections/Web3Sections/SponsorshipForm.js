@@ -176,7 +176,8 @@ class SponsorshipForm extends Component{
     }
 
   handleChange = (e, { value }) => {
-    const result = value.replace(/[^a-z0-9 _.,:;!?$()\[\]{}\-\+\*]/gi, '');
+    // Aligned with contract's sanitize(): abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ .,:;()[]{}+-*$!?
+    const result = value.replace(/[^a-zA-Z0-9_ .,:;()\[\]{}+\-*$!?]/g, '');
     this.setState({ sponsorQuote:result});
     try{
         let temp = this.replaceText(this.state.element.image,result);

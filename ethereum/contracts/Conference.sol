@@ -1300,6 +1300,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     address public oldSponsorAddress;
     address public sponsorAddress;
     address public treasurer;
+    mapping(address => uint256) public pendingWithdrawals;
     address public littleTravelerAddress;
     string constant private DET_LOGO = "Logo";
     string constant private DET_TITLE = "Title";
@@ -1343,6 +1344,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     event NewLittleTravelerAddress(address indexed oldLittleTravelerAddress, address indexed newLittleTravelerAddress);
     event Paused(bool paused);
     event LittleTravelerDiscountChanged(uint256 value);
+    event PendingWithdrawal(address indexed sponsor, uint256 amount);
 
     constructor() ERC721("Web3 In Travel NFT Ticket - BCN 2023", "WEB3INTRAVEL") Ownable(){
         details[DET_TITLE] = "WEB3 IN TRAVEL - II Edition";
@@ -1383,7 +1385,6 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         require(_tokenId <= MAX_ID, ERR_SOLD_OUT);
         require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
         address _sender = _msgSender();
-        require(tx.origin == _sender, ERR_NO_HACKS_PLS);
         uint256 _msgValue = msg.value;
         require(_msgValue == expectedAmount(_airdrop), ERR_INSERT_EXACT);
         prices[_tokenId] = _msgValue;
@@ -1409,7 +1410,6 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         require(!paused, ERR_MINTING_PAUSED);
         require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
         address _sender = _msgSender();
-        require(tx.origin == _sender, ERR_NO_HACKS_PLS);
         require(msg.value == sponsorshipPrice, ERR_INSERT_EXACT);
         uint256 len = bytes(_quote).length;
         require(len > 0 && len <= 32, ERR_TOO_MANY_CHARS);
@@ -1422,11 +1422,19 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         sponsorPayment = sponsorshipPrice;
         sponsorshipPrice = (sponsorshipPrice * 12) / 10;
         if (oldSponsorPayment > 0){
-            (bool sent,) = payable(oldSponsorAddress).call{value:oldSponsorPayment}("");
-            require(sent, ERR_SENT_FAIL);
+            pendingWithdrawals[oldSponsorAddress] += oldSponsorPayment;
+            emit PendingWithdrawal(oldSponsorAddress, oldSponsorPayment);
             emit Refunded(oldSponsorAddress, oldSponsorPayment);
         }
         emit NewSponsorship(_sender, sponsorPayment, _quote);
+    }
+
+    function withdrawRefund() external nonReentrant {
+        uint256 amount = pendingWithdrawals[_msgSender()];
+        require(amount > 0, "No pending refund");
+        pendingWithdrawals[_msgSender()] = 0;
+        (bool sent,) = payable(_msgSender()).call{value: amount}("");
+        require(sent, ERR_SENT_FAIL);
     }
 
     function getSlice(uint end, string memory inputString) public pure returns (string memory) {
@@ -1450,9 +1458,12 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function countTrailingZeros(string memory inputString) internal pure returns (uint) {
         bytes memory myBytes = bytes(inputString);
+        if (myBytes.length == 0) {
+            return 0;
+        }
         uint count = 0;
-        for (uint256 i = myBytes.length - 1; i >= 0; i--) {
-            if (myBytes[i] == 0x30) {
+        for (uint256 i = myBytes.length; i > 0; i--) {
+            if (myBytes[i - 1] == 0x30) {
                 count++;
             } else {
                 break;
@@ -1486,7 +1497,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     }
 
     function tokenURI(uint256 _tokenId) override public view returns (string memory) {
-        require(_tokenId <= totalSupply(), ERR_NOT_EXISTS);
+        require(_tokenId > 0 && _tokenId <= totalSupply(), ERR_NOT_EXISTS);
         string memory _details_ticket_number = string(abi.encodePacked(DET_TICKET_NUMBER,toString(_tokenId)));
 
         string[5] memory parts;
@@ -1530,9 +1541,10 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
    }
 
 
-    function withdraw() external onlyOwner {
+    function withdraw() external onlyOwner nonReentrant {
         uint256 amount = address(this).balance;
-        payable(treasurer).transfer(amount);
+        (bool sent,) = payable(treasurer).call{value: amount}("");
+        require(sent, ERR_SENT_FAIL);
         emit Withdraw(msg.sender, treasurer, amount);
     }
 

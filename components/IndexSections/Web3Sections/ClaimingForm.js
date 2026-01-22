@@ -128,7 +128,9 @@ class ClaimingForm extends Component{
           let priceBeforeDiscount = this.props.state.web3.utils.fromWei(await instance.methods.price().call());
           await this.isOwningLittleTraveler();
 
-          let adjustedPrice = (this.state.isOwningLittleTraveler ? (priceBeforeDiscount - (priceBeforeDiscount * lTPercentageDiscount) / 100) : 1 * priceBeforeDiscount).toFixed(18);
+          // Use contract's expectedAmount to avoid floating point precision issues
+          let adjustedPriceWei = await instance.methods.expectedAmount(this.state.checked).call({from: accounts[0]});
+          let adjustedPrice = this.props.state.web3.utils.fromWei(adjustedPriceWei);
           if (adjustedPrice > this.props.state.web3Settings.ethBalance){
             console.log("You do not have enough money");
             this.setState({totalSupply,adjustedPrice,lTPercentageDiscount, priceBeforeDiscount, loading: this.state.loading +1,
@@ -232,22 +234,29 @@ class ClaimingForm extends Component{
       console.log("end fetching");
     }
 
-  handleClick = (e, { checked }) => {
+  handleClick = async (e, { checked }) => {
     if (this.state.loading > 0){
       return;
     }
     console.log("cheked: " + checked);
-    var adjustedPrice = (checked ? this.state.adjustedPrice * this.state.multiplier : this.state.adjustedPrice / this.state.multiplier).toFixed(18);
 
-    var errorMessage = "";
-    if (adjustedPrice > this.props.state.web3Settings.ethBalance){
-      console.log("You do not have enough money");
-      errorMessage = `Minting a ticket requires ${adjustedPrice} $${this.state.chain.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now. You need to refill your wallet with more $${this.state.chain.coin}`;
+    // Use contract's expectedAmount to get exact price and avoid floating point issues
+    try {
+      const accounts = await this.props.state.web3.eth.getAccounts();
+      const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr);
+      let adjustedPriceWei = await instance.methods.expectedAmount(checked).call({from: accounts[0]});
+      var adjustedPrice = this.props.state.web3.utils.fromWei(adjustedPriceWei);
+
+      var errorMessage = "";
+      if (parseFloat(adjustedPrice) > this.props.state.web3Settings.ethBalance){
+        console.log("You do not have enough money");
+        errorMessage = `Minting a ticket requires ${adjustedPrice} $${this.state.chain.coin} and in your address there are only ${this.props.state.web3Settings.ethBalance} $${this.state.chain.coin} right now. You need to refill your wallet with more $${this.state.chain.coin}`;
+      }
+      this.setState({errorMessage,adjustedPrice,checked});
+    } catch(err) {
+      console.log(err);
+      this.setState({errorMessage: err.message, checked});
     }
-    else{
-      errorMessage:"";
-    }
-    this.setState({errorMessage,adjustedPrice,checked});
   }
 
   render(){

@@ -119,7 +119,7 @@ class MyDapp extends Component {
         }
 
         var web3Modal = new Web3Modal({
-            network: "rinkeby", // optional
+            network: "matic", // Polygon mainnet
             cacheProvider: false, // optional
             providerOptions // required
         });
