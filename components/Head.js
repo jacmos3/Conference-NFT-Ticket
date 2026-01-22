@@ -47,7 +47,7 @@ function Head() {
         href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&display=swap"
         rel="stylesheet"
       />
-      <link rel = "stylesheet" href = "//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.12/semantic.min.css" />
+      {/* Semantic UI CSS now imported from node_modules in _app.js (self-hosted) */}
     </HTMLHead>
   );
 }

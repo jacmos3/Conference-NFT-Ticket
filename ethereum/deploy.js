@@ -1,4 +1,4 @@
-const HDWalletProvider = require('truffle-hdwallet-provider');
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 const Web3 = require('web3');
 const {interface, object:bytecode} = require('./compile');
 const fs = require ("fs-extra");
@@ -6,7 +6,16 @@ require('dotenv').config();
 
 const seed = process.env.MNEMONIC;
 const providerUrl = process.env.PROVIDER_URL;
-const provider = new HDWalletProvider(seed,providerUrl);
+
+if (!seed || !providerUrl) {
+  console.error("ERROR: MNEMONIC and PROVIDER_URL must be set in .env file");
+  process.exit(1);
+}
+
+const provider = new HDWalletProvider({
+  mnemonic: { phrase: seed },
+  providerOrUrl: providerUrl
+});
 const web3 = new Web3(provider);
 let contract;
 let accounts;

@@ -67,7 +67,7 @@ class MyDapp extends Component {
         lnk_learn_more:process.env.NEXT_PUBLIC_GEN_LNK_LEARN_MORE,
         lnk_littleTraveler:process.env.NEXT_PUBLIC_LNK_LITTLE_TRAVELER,
         web3Settings: {
-            infura: process.env.NEXT_PUBLIC_WEB3SETTINGS_INFURA,
+            // Infura key removed from client - use public RPCs instead
             isWeb3Connected: false,
 
             chains: [
@@ -152,7 +152,11 @@ class MyDapp extends Component {
                 },
                 package: WalletConnectProvider,
                 options: {
-                    infuraId: this.state.web3Settings.infura // required
+                    // Use public RPC instead of exposing Infura key
+                    rpc: {
+                        137: "https://polygon-rpc.com"
+                    },
+                    chainId: 137
                 }
             }
         }

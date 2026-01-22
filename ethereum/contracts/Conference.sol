@@ -1334,6 +1334,16 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     mapping(uint256 => uint256) public prices;
     mapping(uint256 => address) public mintedBy;
     mapping(uint256 => bool) public airdrop;
+    mapping(address => uint256) public mintCount;
+    uint256 public maxMintPerAddress = 5;
+
+    // Timelock for critical operations
+    uint256 public constant TIMELOCK_DELAY = 24 hours;
+    mapping(bytes32 => uint256) public pendingOperations;
+
+    event OperationScheduled(bytes32 indexed operationId, uint256 executeTime);
+    event OperationExecuted(bytes32 indexed operationId);
+    event OperationCancelled(bytes32 indexed operationId);
     event Refunded(address indexed oldSponsorAddress, uint256 oldSponsorPayment);
     event NewSponsorship(address indexed sender, uint256 indexed amount, string _quote);
     event Minting(address indexed sender, uint256 indexed tokenId, uint256 msgValue, bool indexed airdrop);
@@ -1389,11 +1399,13 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         require(_tokenId <= MAX_ID, ERR_SOLD_OUT);
         require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
         address _sender = _msgSender();
+        require(mintCount[_sender] < maxMintPerAddress, "Max mint limit reached");
         uint256 _msgValue = msg.value;
         require(_msgValue == expectedAmount(_airdrop), ERR_INSERT_EXACT);
         prices[_tokenId] = _msgValue;
         mintedBy[_tokenId] = _sender;
         airdrop[_tokenId] = _airdrop;
+        mintCount[_sender]++;
         sumIncrement += ((END_PRICE - INITIAL_PRICE) - sumIncrement) / 10;
         price = INITIAL_PRICE + sumIncrement;
         emit Minting(_sender, _tokenId, _msgValue, _airdrop);
@@ -1556,14 +1568,77 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         emit Withdraw(msg.sender, treasurer, amount);
     }
 
-    function setTreasurer(address _newAddress) external onlyOwner{
+    // ============ TIMELOCK FUNCTIONS ============
+
+    function _getOperationId(string memory operation, address newAddress) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(operation, newAddress));
+    }
+
+    function scheduleTreasurerChange(address _newAddress) external onlyOwner {
+        require(_newAddress != address(0), "Invalid address");
+        bytes32 opId = _getOperationId("setTreasurer", _newAddress);
+        require(pendingOperations[opId] == 0, "Operation already scheduled");
+        pendingOperations[opId] = block.timestamp + TIMELOCK_DELAY;
+        emit OperationScheduled(opId, pendingOperations[opId]);
+    }
+
+    function executeTreasurerChange(address _newAddress) external onlyOwner {
+        bytes32 opId = _getOperationId("setTreasurer", _newAddress);
+        require(pendingOperations[opId] != 0, "Operation not scheduled");
+        require(block.timestamp >= pendingOperations[opId], "Timelock not expired");
+        delete pendingOperations[opId];
         emit NewTreasurer(treasurer, _newAddress);
+        emit OperationExecuted(opId);
         treasurer = _newAddress;
     }
 
-    function setLittleTravelerAddress(address _newAddress) external onlyOwner{
+    function cancelTreasurerChange(address _newAddress) external onlyOwner {
+        bytes32 opId = _getOperationId("setTreasurer", _newAddress);
+        require(pendingOperations[opId] != 0, "Operation not scheduled");
+        delete pendingOperations[opId];
+        emit OperationCancelled(opId);
+    }
+
+    function scheduleLittleTravelerChange(address _newAddress) external onlyOwner {
+        require(_newAddress != address(0), "Invalid address");
+        bytes32 opId = _getOperationId("setLittleTraveler", _newAddress);
+        require(pendingOperations[opId] == 0, "Operation already scheduled");
+        pendingOperations[opId] = block.timestamp + TIMELOCK_DELAY;
+        emit OperationScheduled(opId, pendingOperations[opId]);
+    }
+
+    function executeLittleTravelerChange(address _newAddress) external onlyOwner {
+        bytes32 opId = _getOperationId("setLittleTraveler", _newAddress);
+        require(pendingOperations[opId] != 0, "Operation not scheduled");
+        require(block.timestamp >= pendingOperations[opId], "Timelock not expired");
+        delete pendingOperations[opId];
         emit NewLittleTravelerAddress(littleTravelerAddress, _newAddress);
+        emit OperationExecuted(opId);
         littleTravelerAddress = _newAddress;
+    }
+
+    function cancelLittleTravelerChange(address _newAddress) external onlyOwner {
+        bytes32 opId = _getOperationId("setLittleTraveler", _newAddress);
+        require(pendingOperations[opId] != 0, "Operation not scheduled");
+        delete pendingOperations[opId];
+        emit OperationCancelled(opId);
+    }
+
+    function getOperationTime(string memory operation, address addr) external view returns (uint256) {
+        return pendingOperations[_getOperationId(operation, addr)];
+    }
+
+    // ============ DEPRECATED - Use timelock functions above ============
+    // Kept for backwards compatibility but should not be used
+
+    /// @notice DEPRECATED: Use scheduleTreasurerChange + executeTreasurerChange
+    function setTreasurer(address _newAddress) external onlyOwner {
+        revert("Use timelock: scheduleTreasurerChange + executeTreasurerChange");
+    }
+
+    /// @notice DEPRECATED: Use scheduleLittleTravelerChange + executeLittleTravelerChange
+    function setLittleTravelerAddress(address _newAddress) external onlyOwner {
+        revert("Use timelock: scheduleLittleTravelerChange + executeLittleTravelerChange");
     }
 
     function setSponsorQuote(string memory _quote) external onlyOwner{
@@ -1583,6 +1658,11 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
       require(value > 0 && value < 100, "Insert value between 1-99");
       emit LittleTravelerDiscountChanged(value);
       lTPercentageDiscount = value;
+    }
+
+    function setMaxMintPerAddress(uint256 _max) external onlyOwner {
+        require(_max > 0, "Max must be greater than 0");
+        maxMintPerAddress = _max;
     }
 
     function setDateTime(string memory _newDate, string memory _newDateLong, string memory _newTime, string memory _newTimeLong, uint256 _dateTime) external onlyOwner{
