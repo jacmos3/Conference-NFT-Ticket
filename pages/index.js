@@ -15,6 +15,44 @@ import styles from "../styles/pages/INDEX.module.scss";
 //import UAuthSPA from "@uauth/js";
 
 class MyDapp extends Component {
+    provider = null;
+
+    // Named handlers for cleanup
+    handleAccountsChanged = (accounts) => {
+        console.log("account changed " + accounts[0]);
+        window.location.reload();
+    }
+
+    handleChainChanged = (networkId) => {
+        console.log("chain changed: reloading page");
+        window.location.reload();
+    }
+
+    handleDisconnect = () => {
+        console.log("disconnecting");
+        this.cleanupProvider();
+    }
+
+    cleanupProvider = () => {
+        if (this.provider) {
+            try {
+                this.provider.removeListener('accountsChanged', this.handleAccountsChanged);
+                this.provider.removeListener('chainChanged', this.handleChainChanged);
+                this.provider.removeListener('disconnect', this.handleDisconnect);
+                if (this.provider.disconnect) {
+                    this.provider.disconnect();
+                }
+            } catch(err) {
+                console.log("Cleanup error:", err);
+            }
+            this.provider = null;
+        }
+    }
+
+    componentWillUnmount() {
+        this.cleanupProvider();
+    }
+
     state = {
         twitter: process.env.NEXT_PUBLIC_GEN_TWITTER,
         website: process.env.NEXT_PUBLIC_GEN_WEBSITE,
@@ -86,6 +124,7 @@ class MyDapp extends Component {
 
     disconnect = (event) => {
         console.log("disconnect");
+        this.cleanupProvider();
         var web3Settings = this.state.web3Settings;
         web3Settings.isWeb3Connected = false;
         this.setState({web3Settings: web3Settings});
@@ -136,30 +175,15 @@ class MyDapp extends Component {
 
         var web3 = new Web3(provider);
 
-        provider.on('accountsChanged', function (accounts) {
-            console.log("account changed " + accounts[0]);
-            window.location.reload();
-        })
+        // Store provider reference for cleanup
+        this.provider = provider;
 
-        provider.on('chainChanged', function (networkId) {
-            console.log("chain changed: reloading page");
-            window.location.reload();
-        })
+        // Use named handlers for proper cleanup
+        provider.on('accountsChanged', this.handleAccountsChanged);
+        provider.on('chainChanged', this.handleChainChanged);
+        provider.on('disconnect', this.handleDisconnect);
 
-        provider.on("disconnect", function () {
-            console.log("disconnecting");
-            try{
-              provider.disconnect();
-              web3Modal.clearCachedProvider();
-              provider = null;
-            }
-            catch(err){
-              console.log(err);
-            }
-        }
-        );
-
-        this.setState({web3: web3});
+        this.setState({web3: web3, web3Modal: web3Modal});
         //console.log(this.state.web3);
         const networkId = await this.state.web3.eth.net.getId();
         const accounts = await this.state.web3.eth.getAccounts();

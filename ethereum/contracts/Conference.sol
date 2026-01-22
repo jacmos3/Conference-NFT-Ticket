@@ -1301,6 +1301,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     address public sponsorAddress;
     address public treasurer;
     mapping(address => uint256) public pendingWithdrawals;
+    uint256 public totalPendingWithdrawals;
     address public littleTravelerAddress;
     string constant private DET_LOGO = "Logo";
     string constant private DET_TITLE = "Title";
@@ -1339,7 +1340,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     event MintingByOwner(address indexed sender, uint256 indexed tokenId);
     event DetailChanged(string indexed detail, string oldValue, string newValue);
     event ExpirationChanged(uint256 dateTime, uint256 _dateTime);
-    event Withdraw(address indexed owner, address indexed trasurer, uint256 amount);
+    event Withdraw(address indexed owner, address indexed treasurer, uint256 amount);
     event NewTreasurer(address indexed oldTreasurer, address indexed newTreasurer);
     event NewLittleTravelerAddress(address indexed oldLittleTravelerAddress, address indexed newLittleTravelerAddress);
     event Paused(bool paused);
@@ -1375,6 +1376,9 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         require(block.timestamp <= dateTime, ERR_TIME_EXPIRED);
         address _sender = _msgSender();
         mintedBy[_tokenId] = _sender;
+        // Increment price to prevent bonding curve manipulation
+        sumIncrement += ((END_PRICE - INITIAL_PRICE) - sumIncrement) / 10;
+        price = INITIAL_PRICE + sumIncrement;
         emit MintingByOwner(_sender, _tokenId);
         _safeMint(_sender, _tokenId);
     }
@@ -1423,6 +1427,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         sponsorshipPrice = (sponsorshipPrice * 12) / 10;
         if (oldSponsorPayment > 0){
             pendingWithdrawals[oldSponsorAddress] += oldSponsorPayment;
+            totalPendingWithdrawals += oldSponsorPayment;
             emit PendingWithdrawal(oldSponsorAddress, oldSponsorPayment);
             emit Refunded(oldSponsorAddress, oldSponsorPayment);
         }
@@ -1433,12 +1438,14 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         uint256 amount = pendingWithdrawals[_msgSender()];
         require(amount > 0, "No pending refund");
         pendingWithdrawals[_msgSender()] = 0;
+        totalPendingWithdrawals -= amount;
         (bool sent,) = payable(_msgSender()).call{value: amount}("");
         require(sent, ERR_SENT_FAIL);
     }
 
     function getSlice(uint end, string memory inputString) public pure returns (string memory) {
         bytes memory myBytes = bytes(inputString);
+        require(end <= myBytes.length, "Slice out of bounds");
         bytes memory extractedBytes = new bytes(end + 1);
         uint index = 0;
 
@@ -1542,7 +1549,8 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
 
     function withdraw() external onlyOwner nonReentrant {
-        uint256 amount = address(this).balance;
+        uint256 amount = address(this).balance - totalPendingWithdrawals;
+        require(amount > 0, "No funds to withdraw");
         (bool sent,) = payable(treasurer).call{value: amount}("");
         require(sent, ERR_SENT_FAIL);
         emit Withdraw(msg.sender, treasurer, amount);
@@ -1559,6 +1567,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     }
 
     function setSponsorQuote(string memory _quote) external onlyOwner{
+      require(sanitize(_quote), ERR_INPUT_NOT_VALID);
       emit DetailChanged(DET_SPONSOR_QUOTE, details[DET_SPONSOR_QUOTE], _quote);
       emit DetailChanged(DET_SPONSOR_QUOTE_LONG, details[DET_SPONSOR_QUOTE_LONG], _quote);
       details[DET_SPONSOR_QUOTE] = _quote;
@@ -1571,7 +1580,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     }
 
     function setLTPercentageDiscount(uint256 value) external onlyOwner{
-      require(value > 0 && value <= 100, ERR_INSERT_1_100_VALUE);
+      require(value > 0 && value < 100, "Insert value between 1-99");
       emit LittleTravelerDiscountChanged(value);
       lTPercentageDiscount = value;
     }
@@ -1600,26 +1609,31 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     }
 
     function setAddressLocation(string memory _newAddressLocation) external onlyOwner{
+        require(sanitize(_newAddressLocation), ERR_INPUT_NOT_VALID);
         emit DetailChanged(DET_ADDRESS_LOCATION, details[DET_ADDRESS_LOCATION], _newAddressLocation);
         details[DET_ADDRESS_LOCATION] = _newAddressLocation;
     }
 
     function setCity(string memory _newCity) external onlyOwner{
+        require(sanitize(_newCity), ERR_INPUT_NOT_VALID);
         emit DetailChanged(DET_CITY, details[DET_CITY], _newCity);
         details[DET_CITY] = _newCity;
     }
 
+    /// @notice SECURITY: Logo can contain SVG tags. Owner must ensure no malicious content.
     function setLogo(string memory _newLogo) external onlyOwner{
         emit DetailChanged(DET_LOGO, details[DET_LOGO], _newLogo);
         details[DET_LOGO] = _newLogo;
     }
 
     function setTitle(string memory _newTitle) external onlyOwner{
+        require(sanitize(_newTitle), ERR_INPUT_NOT_VALID);
         emit DetailChanged(DET_TITLE, details[DET_TITLE], _newTitle);
         details[DET_TITLE] = _newTitle;
     }
 
     function setSubtitle(string memory _newSubtitle) external onlyOwner{
+        require(sanitize(_newSubtitle), ERR_INPUT_NOT_VALID);
         emit DetailChanged(DET_SUBTITLE, details[DET_SUBTITLE], _newSubtitle);
         details[DET_SUBTITLE] = _newSubtitle;
     }
