@@ -1356,6 +1356,7 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
     event Paused(bool paused);
     event LittleTravelerDiscountChanged(uint256 value);
     event PendingWithdrawal(address indexed sponsor, uint256 amount);
+    event EmergencyTokenRecovery(address indexed token, address indexed to, uint256 amount);
 
     constructor() ERC721("Web3 In Travel NFT Ticket - BCN 2023", "WEB3INTRAVEL") Ownable(){
         details[DET_TITLE] = "WEB3 IN TRAVEL - II Edition";
@@ -1700,8 +1701,9 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
         details[DET_CITY] = _newCity;
     }
 
-    /// @notice SECURITY: Logo can contain SVG tags. Owner must ensure no malicious content.
+    /// @notice Logo must pass SVG sanitization to prevent XSS attacks
     function setLogo(string memory _newLogo) external onlyOwner{
+        require(sanitizeSvg(_newLogo), "SVG contains forbidden content");
         emit DetailChanged(DET_LOGO, details[DET_LOGO], _newLogo);
         details[DET_LOGO] = _newLogo;
     }
@@ -1741,6 +1743,77 @@ contract Web3InTravelNFTTicket is ERC721Enumerable, ReentrancyGuard, Ownable {
 
     function detailCheck(string memory _detail) external view returns (string memory){
       return details[_detail];
+    }
+
+    /// @notice Sanitize SVG input to prevent XSS attacks
+    /// @dev Blocks script tags, event handlers, and javascript: URLs
+    function sanitizeSvg(string memory input) internal pure returns(bool){
+        bytes memory byteString = bytes(input);
+        uint256 len = byteString.length;
+
+        // Check for dangerous patterns (case-insensitive check for common attacks)
+        for(uint256 i = 0; i < len; i++){
+            // Look for potential script or event handler starts
+            if(i + 6 < len){
+                // Check for <script (case variations)
+                if((byteString[i] == '<' || byteString[i] == 0x3C) &&
+                   (byteString[i+1] == 's' || byteString[i+1] == 'S') &&
+                   (byteString[i+2] == 'c' || byteString[i+2] == 'C') &&
+                   (byteString[i+3] == 'r' || byteString[i+3] == 'R') &&
+                   (byteString[i+4] == 'i' || byteString[i+4] == 'I') &&
+                   (byteString[i+5] == 'p' || byteString[i+5] == 'P') &&
+                   (byteString[i+6] == 't' || byteString[i+6] == 'T')){
+                    return false;
+                }
+            }
+
+            // Check for javascript: URLs
+            if(i + 10 < len){
+                if((byteString[i] == 'j' || byteString[i] == 'J') &&
+                   (byteString[i+1] == 'a' || byteString[i+1] == 'A') &&
+                   (byteString[i+2] == 'v' || byteString[i+2] == 'V') &&
+                   (byteString[i+3] == 'a' || byteString[i+3] == 'A') &&
+                   (byteString[i+4] == 's' || byteString[i+4] == 'S') &&
+                   (byteString[i+5] == 'c' || byteString[i+5] == 'C') &&
+                   (byteString[i+6] == 'r' || byteString[i+6] == 'R') &&
+                   (byteString[i+7] == 'i' || byteString[i+7] == 'I') &&
+                   (byteString[i+8] == 'p' || byteString[i+8] == 'P') &&
+                   (byteString[i+9] == 't' || byteString[i+9] == 'T') &&
+                   byteString[i+10] == ':'){
+                    return false;
+                }
+            }
+
+            // Check for on* event handlers (onclick, onload, onerror, etc.)
+            if(i + 2 < len){
+                if((byteString[i] == 'o' || byteString[i] == 'O') &&
+                   (byteString[i+1] == 'n' || byteString[i+1] == 'N') &&
+                   // Check if followed by common event names
+                   (byteString[i+2] == 'l' || byteString[i+2] == 'L' ||  // onload
+                    byteString[i+2] == 'c' || byteString[i+2] == 'C' ||  // onclick
+                    byteString[i+2] == 'e' || byteString[i+2] == 'E' ||  // onerror
+                    byteString[i+2] == 'm' || byteString[i+2] == 'M' ||  // onmouseover
+                    byteString[i+2] == 'f' || byteString[i+2] == 'F')){  // onfocus
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /// @notice Emergency recovery for ERC20 tokens accidentally sent to this contract
+    /// @dev Only owner can recover tokens, and only to the treasurer address
+    function emergencyRecoverERC20(address tokenAddress, uint256 amount) external onlyOwner nonReentrant {
+        require(tokenAddress != address(0), "Invalid token address");
+        require(amount > 0, "Amount must be greater than 0");
+
+        // Use low-level call to be compatible with non-standard ERC20 tokens
+        (bool success, bytes memory data) = tokenAddress.call(
+            abi.encodeWithSignature("transfer(address,uint256)", treasurer, amount)
+        );
+        require(success && (data.length == 0 || abi.decode(data, (bool))), "Token transfer failed");
+
+        emit EmergencyTokenRecovery(tokenAddress, treasurer, amount);
     }
 
     function toAsciiString(address x) internal pure returns (string memory) {
