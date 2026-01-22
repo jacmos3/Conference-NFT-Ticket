@@ -1,5 +1,5 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const Web3 = require('web3');
+const { Web3 } = require('web3');
 const {interface, object:bytecode} = require('./compile');
 const fs = require ("fs-extra");
 require('dotenv').config();
@@ -17,20 +17,32 @@ const provider = new HDWalletProvider({
   providerOrUrl: providerUrl
 });
 const web3 = new Web3(provider);
-let contract;
-let accounts;
 
 const deploy = async() => {
+  try {
+    const accounts = await web3.eth.getAccounts();
+    console.log("Attempting to deploy from account", accounts[0]);
 
-  accounts = await web3.eth.getAccounts();
-  console.log("Attempting to deploy from account", accounts[0]);
+    const contract = new web3.eth.Contract(interface);
 
-  contract = await new web3.eth.Contract(interface)
-  .deploy({data:'0x'+bytecode, arguments: [],})
-  .send ({from: accounts[0]});
+    const deployedContract = await contract.deploy({
+      data: '0x' + bytecode,
+      arguments: []
+    }).send({
+      from: accounts[0],
+      gas: '5000000'
+    });
 
-  console.log("Contract deployed to", contract.options.address);
-  //fs.writeFileSync('../.env.local', '#THIS IS AN AUTO-GENERATED FILE. DO NOT ADD ELEMENT HERE OR THEY WILL BE CANCELED AT YOUR NEXT DEPLOY\r\nNEXT_PUBLIC_CONTRACT_ADDRESS = "'+ contract.options.address+'"');
+    console.log("Contract deployed to", deployedContract.options.address);
+
+    // Cleanup provider
+    provider.engine.stop();
+
+  } catch (error) {
+    console.error("Deploy failed:", error.message);
+    provider.engine.stop();
+    process.exit(1);
+  }
 }
 
 deploy();

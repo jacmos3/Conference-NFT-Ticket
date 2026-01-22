@@ -82,15 +82,10 @@ class ClaimingForm extends Component{
     try{
       const accounts= await this.props.state.web3.eth.getAccounts();
       const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.ltAddr);
-      let lastUserIndex = await instance.methods.balanceOf(accounts[0]).call()
-      .then((result) =>{
-          return JSON.parse(result);
-      })
-      .catch((error) =>{
-        console.log(error);
-      });
+      // Web3 v4 returns BigInt - convert to Number
+      let lastUserIndex = Number(await instance.methods.balanceOf(accounts[0]).call());
 
-      this.setState({isOwningLittleTraveler: lastUserIndex > 0 ? true : false});
+      this.setState({isOwningLittleTraveler: lastUserIndex > 0});
       console.log(lastUserIndex);
     }catch(err){
       this.setState({errorMessage: err.message});
@@ -103,17 +98,19 @@ class ClaimingForm extends Component{
       try {
           const accounts = await this.props.state.web3.eth.getAccounts();
           const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr);
-          let lTPercentageDiscount = await instance.methods.lTPercentageDiscount().call();
+          // Web3 v4 returns BigInt - convert to Number
+          let lTPercentageDiscount = Number(await instance.methods.lTPercentageDiscount().call());
           console.log("percentage: "+lTPercentageDiscount);
           let paused = await instance.methods.paused().call();
           if (paused){
             console.log("minting paused");
-            this.setState({adjustedPrice,buttonLabel:"Minting paused",loading: this.state.loading +1,errorMessage:"The NFT minting has been paused. Come back later!"});
+            this.setState({adjustedPrice: 0, buttonLabel:"Minting paused",loading: this.state.loading +1,errorMessage:"The NFT minting has been paused. Come back later!"});
             return false;
           }
 
-          let totalSupply = parseInt(await instance.methods.totalSupply().call());
-          let maxSupply = parseInt(await instance.methods.MAX_ID().call());
+          // Web3 v4 returns BigInt - convert to Number
+          let totalSupply = Number(await instance.methods.totalSupply().call());
+          let maxSupply = Number(await instance.methods.MAX_ID().call());
 
           if (totalSupply >= maxSupply){
             console.log("minting finished");
@@ -190,22 +187,13 @@ class ClaimingForm extends Component{
       try{
         const accounts= await this.props.state.web3.eth.getAccounts();
         const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr );
-        let lastUserIndex = await instance.methods.balanceOf(accounts[0]).call()
-        .then((result) =>{
-            return JSON.parse(result);
-        })
-        .catch((error) =>{
-          console.log(error);
-        })
+        // Web3 v4 returns BigInt - convert to Number
+        let lastUserIndex = Number(await instance.methods.balanceOf(accounts[0]).call());
+
         let all = [];
         for (let index = 0; index < lastUserIndex; index++){
-          let tokenId = await instance.methods.tokenOfOwnerByIndex(accounts[0],index).call()
-          .then((result) =>{
-            return result;
-          })
-          .catch((error)=>{
-            console.log(error);
-          });
+          // Web3 v4 returns BigInt for tokenId
+          let tokenId = await instance.methods.tokenOfOwnerByIndex(accounts[0], index).call();
 
           let uri = await instance.methods.tokenURI(tokenId).call()
           .then((result)=> {

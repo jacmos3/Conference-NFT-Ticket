@@ -78,8 +78,9 @@ class SponsorshipForm extends Component{
             return false;
           }
 
-          let totalSupply = parseInt(await instance.methods.totalSupply().call());
-          let maxSupply = parseInt(await instance.methods.MAX_ID().call());
+          // Web3 v4 returns BigInt - convert to Number
+          let totalSupply = Number(await instance.methods.totalSupply().call());
+          let maxSupply = Number(await instance.methods.MAX_ID().call());
 
           let uri = await instance.methods.tokenURI(0).call()
           .then((result)=> {
@@ -147,7 +148,8 @@ class SponsorshipForm extends Component{
       this.setState({loading:this.state.loading+1, errorMessage:''})
       try{
         const instance = new this.props.state.web3.eth.Contract(Conference.Web3InTravelNFTTicket.abi, this.state.chain.addr );
-        let totalSupply = parseInt(await instance.methods.totalSupply().call());
+        // Web3 v4 returns BigInt - convert to Number
+        let totalSupply = Number(await instance.methods.totalSupply().call());
         let all = [];
         for (let index = 1; index <= totalSupply && index <= 15; index++){
           let uri = await instance.methods.tokenURI(index).call()

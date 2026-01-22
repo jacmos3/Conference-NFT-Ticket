@@ -6,7 +6,7 @@ import Sponsorship from '../components/IndexSections/Sponsorship.js';
 import {Header, Button} from 'semantic-ui-react';
 //import web3 from '../ethereum/web3';
 import {Router} from '../routes';
-import Web3 from "web3";
+import { Web3 } from "web3";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import styles from "../styles/pages/INDEX.module.scss";
@@ -189,20 +189,20 @@ class MyDapp extends Component {
 
         this.setState({web3: web3, web3Modal: web3Modal});
         //console.log(this.state.web3);
-        const networkId = await this.state.web3.eth.net.getId();
-        const accounts = await this.state.web3.eth.getAccounts();
+        // Web3 v4 returns BigInt - convert to Number
+        const networkId = Number(await web3.eth.net.getId());
+        const accounts = await web3.eth.getAccounts();
         //console.log("account:"+ accounts[0]);
 
-        const ethBalance = await this.state.web3.eth.getBalance(accounts[0]) / 10 ** 18;
+        // Web3 v4 returns BigInt for balance - convert properly
+        const balanceWei = await web3.eth.getBalance(accounts[0]);
+        const ethBalance = Number(balanceWei) / 10 ** 18;
         // console.log(this.state.web3Settings.isWeb3Connected);
         var web3Settings = this.state.web3Settings;
         web3Settings.account = accounts[0];
         web3Settings.networkId = networkId;
-        web3.eth.net.getNetworkType()
-            .then((value) => {
-                web3Settings.networkName = value;
-                this.forceUpdate();
-            });
+        // getNetworkType is deprecated in v4, use chainId instead
+        web3Settings.networkName = networkId === 137 ? 'polygon' : `chain-${networkId}`;
 
         web3Settings.ethBalance = ethBalance;
         web3Settings.isWeb3Connected = accounts.length > 0;

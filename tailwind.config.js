@@ -1,6 +1,10 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  purge: [],
-  darkMode: false, // or 'media' or 'class'
+  // Tailwind v3: 'purge' is now 'content'
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -73,8 +77,6 @@ module.exports = {
     },
   },
   },
-  variants: {
-    extend: {},
-  },
+  // Tailwind v3: 'variants' is no longer needed - all variants are enabled by default
   plugins: [],
 }
