@@ -13,22 +13,22 @@
   "author": "Trips Community",
   "license": "ISC",
   "dependencies": {
-    "@walletconnect/web3-provider": "^1.8.0",
+    "@walletconnect/ethereum-provider": "^2.11.0",
+    "@walletconnect/modal": "^2.6.2",
     "canvas-confetti": "^1.9.2",
     "dotenv": "^16.3.1",
     "ethers": "^5.7.2",
     "firebase": "^10.7.1",
+    "fs-extra": "^11.2.0",
     "mocha": "^10.2.0",
     "next": "^12.3.4",
-    "next-routes": "^1.4.2",
-    "react": "^17.0.2",
+        "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "sass": "^1.69.5",
     "semantic-ui-css": "^2.5.0",
     "semantic-ui-react": "^2.1.5",
     "solc": "^0.8.23",
-    "web3": "^4.3.0",
-    "web3modal": "^1.9.12"
+    "web3": "^4.3.0"
   },
   "devDependencies": {
     "@truffle/hdwallet-provider": "^2.1.15",
